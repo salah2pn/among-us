@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Among Us Real Life - Ultimate Premium UI</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&display=swap');
+        
+        :root {
+            --bg-color: #000000;
+            --panel-bg: rgba(15, 23, 42, 0.85);
+            --panel-border: #475569;
+            --imposter-color: #ff3333;
+            --crew-color: #00eeff;
+            --button-color: #facc15;
+            --ghost-color: #64748b;
+        }
+
+        html, body {
+            overscroll-behavior-y: contain;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('backd.jpeg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #ffffff;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+            user-select: none;
+            overflow-x: hidden;
+            animation: spacePan 100s linear infinite;
+        }
+
+        @keyframes spacePan {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 500px; }
+        }
+
+        .player-identity-header {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 3px 3px 0px #000;
+            margin: 10px auto;
+            max-width: 500px;
+            background: rgba(30, 41, 59, 0.9);
+            padding: 12px;
+            border-radius: 16px;
+            border: 3px solid #334155;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+        }
+
+        #global-task-section {
+            background: rgba(15, 23, 42, 0.95); padding: 15px;
+            border-radius: 18px; border: 4px solid #334155; margin: 10px auto 15px auto;
+            max-width: 500px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .task-bar-container {
+            width: 100%; background-color: #0f172a;
+            border-radius: 20px; border: 3px solid #fff;
+            height: 30px; overflow: hidden; margin-top: 10px;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.8);
+        }
+        .task-bar-fill {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px #22c55e;
+        }
+
+        .screen { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        h1, h2, h3 { font-weight: 900; margin: 12px 0;  letter-spacing: 1px; }
+        h1 { font-size: 3.2rem; color: #facc15; }
+        h2 { font-size: 2.2rem; }
+
+        .panel {
+            background: var(--panel-bg); 
+            border: 4px solid var(--panel-border);
+            border-radius: 24px; padding: 22px; margin: 15px auto;
+            max-width: 500px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        button {
+            font-family: 'Cairo', sans-serif; font-weight: 900; font-size: 1.4rem;
+            padding: 15px 25px; margin: 12px 6px; border: 4px solid #000000;
+            border-radius: 16px; cursor: pointer; box-shadow: 0 7px 0px #000000;
+            transition: all 0.05s ease-in-out;
+            position: relative;
+        }
+        button:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 2px 0px #000000; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: 0 3px 0px #000; transform: translateY(4px); }
+        
+        .btn-main { background-color: var(--button-color); color: #000; }
+        .btn-crew { background-color: var(--crew-color); color: #000; }
+        .btn-skip { background-color: #475569; color: #fff; }
+
+        .btn-danger { background-color: var(--imposter-color); color: #fff; }
+        .btn-sabotage { background-color: #991b1b; color: #fff; }
+        .btn-report { background-color: #ea580c; color: #fff; }
+
+        .task-item {
+            background: rgba(15, 23, 42, 0.9); padding: 15px; border-radius: 14px;
+            margin: 12px 0; display: flex; align-items: center;
+            justify-content: space-between; border-right: 6px solid var(--crew-color);
+            border-left: 2px solid #334155; font-weight: 800; font-size: 1.15rem;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3); cursor: pointer;
+        }
+        .task-item.completed { border-right-color: #22c55e; opacity: 0.35; text-decoration: line-through; pointer-events: none; }
+
+        .ghost-chat-wrapper {
+            border-top: 3px dashed var(--ghost-color); margin-top: 20px; padding-top: 15px; text-align: right;
+        }
+        .ghost-chat-box {
+            background: rgba(10, 15, 26, 0.95); border: 3px solid var(--ghost-color);
+            border-radius: 16px; height: 160px; overflow-y: auto; padding: 10px;
+            margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 4px 8px #000;
+        }
+        .ghost-msg-line { font-weight: 800; font-size: 1rem; line-height: 1.4; word-break: break-all; }
+        .ghost-msg-name { color: #f87171; }
+        .ghost-msg-text { color: #e2e8f0; }
+        .ghost-chat-input-row { display: flex; gap: 8px; }
+        .ghost-chat-input-row input { flex: 1; padding: 10px; font-size: 1.1rem; border-radius: 10px; border: 2px solid var(--ghost-color); background: #0f172a; color: #fff; font-family: 'Cairo', sans-serif; font-weight: bold; text-align: right; }
+        .ghost-chat-input-row button { padding: 8px 18px; margin: 0; font-size: 1.1rem; border-radius: 10px; box-shadow: 0 4px 0 #000; }
+
+        .custom-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 20000;
+            justify-content: center; align-items: center; padding: 20px;
+            box-sizing: border-box; overflow-y: auto;
+        }
+        .modal-content {
+            background: #0f172a; border: 5px solid #64748b;
+            border-radius: 28px; padding: 25px 20px; max-width: 450px; width: 100%;
+            box-shadow: 0 25px 50px rgba(0,0,0,1);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        #reveal-screen-content { animation: flashImpact 1s ease-out; }
+        @keyframes flashImpact { 0% { background-color: #fff; } 100% { background-color: transparent; } }
+
+        #sabotage-alert {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(180, 0, 0, 0.95); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+            animation: blink 0.6s infinite alternate;
+        }
+        @keyframes blink { from { opacity: 0.95; background: rgba(160,0,0,0.95); } to { opacity: 0.7; background: rgba(30,0,0,0.95); } }
+        
+        #reader { width: 100%; max-width: 320px; margin: 15px auto; background: #000; border: 5px dashed var(--button-color); border-radius: 16px; overflow: hidden; }
+        
+        #ejection-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; z-index: 30000; justify-content: center; align-items: center; flex-direction: column;
+            padding: 30px; box-sizing: border-box;
+        }
+        
+        .vote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+        .vote-card { background: rgba(30, 41, 59, 0.95); padding: 18px 10px; border-radius: 16px; border: 4px solid #475569; cursor: pointer; font-size: 1.35rem; font-weight: 900; box-shadow: 0 6px 0 #000; transition: all 0.1s; position: relative; text-shadow: 2px 2px 0px #000; }
+        .vote-card:active:not(.disabled) { transform: translateY(3px); box-shadow: 0 3px 0 #000; }
+        .vote-card.disabled { cursor: not-allowed; pointer-events: none; }
+        .vote-card.dead { background: #1e293b; color: #64748b; pointer-events: none; text-decoration: line-through; opacity: 0.4; box-shadow: none; border-color: #334155; }
+        
+        .voters-names-list { font-size: 0.95rem; color: #facc15; margin-top: 8px; font-weight: 900; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 8px; display: inline-block; border: 1px solid #475569; text-shadow: none; }
+
+        input, select { padding: 14px; font-size: 1.35rem; border-radius: 12px; border: 3px solid #475569; background: #0f172a; color: #fff; text-align: center; width: 85%; font-family: 'Cairo', sans-serif; font-weight: 900; }
+        
+        #qrcode-identity-box { background: white; padding: 15px; border-radius: 20px; display: inline-block; margin: 15px 0; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .shhh-image-container { width: 100%; max-width: 250px; margin: 0 auto 15px auto; display: block; }
+
+        /* الألعاب التفاعلية */
+        .wire-canvas-container { width: 100%; height: 280px; position: relative; background: #111827; border-radius: 12px; border: 3px solid #374151; overflow: hidden; touch-action: none; margin: 10px 0; }
+        .wire-canvas-element { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+        .download-btn-active { width: 100%; padding: 25px; font-size: 1.5rem; background: radial-gradient(circle, #3b82f6, #1d4ed8); color: white; border-radius: 16px; border: 3px solid #60a5fa; box-shadow: 0 6px 0 #1e3a8a; user-select: none; -webkit-user-select: none; touch-action: none; }
+        .download-btn-active:active { transform: translateY(4px); box-shadow: 0 2px 0 #1e3a8a; }
+        .maze-gyro-container { width: 100%; height: 240px; background: #030712; border: 3px dashed #4b5563; border-radius: 16px; position: relative; overflow: hidden; margin: 12px 0; }
+        .maze-gyro-ball { width: 22px; height: 22px; background: #facc15; border-radius: 50%; position: absolute; box-shadow: 0 0 10px #facc15; transition: top 0.05s ease, left 0.05s ease; }
+        .maze-gyro-target { width: 34px; height: 34px; border: 3px solid #22c55e; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(34, 197, 94, 0.2); box-shadow: 0 0 12px #22c55e; }
+        .wiper-scratch-area { width: 100%; height: 220px; background: #1e1b4b; position: relative; border-radius: 14px; border: 3px solid #4338ca; overflow: hidden; touch-action: none; }
+        .wiper-scratch-canvas { position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer; z-index: 4; }
+        .wiper-clean-overlay { position: absolute; width:100%; top:50%; transform:translateY(-50%); text-align:center; font-size:1.6rem; color:#22c55e; font-weight:900; pointer-events:none; z-index: 1; text-shadow: 2px 2px 4px #000; }
+        .radio-tune-container { background: #1f2937; padding: 15px; border-radius: 14px; border: 2px solid #4b5563; margin: 10px 0; }
+        .radio-wave-box { width: 100%; height: 100px; background: #000; border-radius: 8px; border: 2px solid #10b981; overflow: hidden; position: relative; margin-bottom: 12px; }
+        .radio-slider-element { width: 95%; margin: 15px auto; display: block; -webkit-appearance: none; height: 10px; border-radius: 5px; background: #4b5563; outline: none; }
+        .radio-slider-element::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #facc15; cursor: pointer; border: 2px solid #fff; }
+        .card-swipe-track { width: 100%; height: 75px; background: #374151; border-radius: 14px; position: relative; border: 3px solid #4b5563; margin: 15px 0; overflow: hidden; touch-action: none; }
+        .card-swipe-block { width: 70px; height: 100%; background: linear-gradient(135deg, #facc15, #eab308); border-radius: 10px; position: absolute; top: 0; left: 0; cursor: grab; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000; border: 1px solid #fff; box-shadow: 2px 0 5px rgba(0,0,0,0.5); }
+        .sorting-drag-zone { display: flex; justify-content: space-around; margin-bottom: 20px; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+        .sorting-drop-zone { display: flex; justify-content: space-around; margin-top: 20px; gap: 10px; }
+        .sorting-node { width: 55px; height: 55px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; cursor: grab; text-shadow: 1px 1px 2px #000; }
+        .sorting-slot { width: 65px; height: 65px; border-radius: 12px; border: 3px dashed #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); }
+        .pattern-lock-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 240px; margin: 15px auto; touch-action: none; position: relative; }
+        .pattern-lock-dot { width: 45px; height: 45px; background: #4b5563; border-radius: 50%; margin: auto; border: 3px solid #9ca3af; transition: all 0.1s; }
+        .pattern-lock-dot.active { background: #00eeff; border-color: #fff; box-shadow: 0 0 15px #00eeff; }
+        .satellite-dish-frame { width: 160px; height: 160px; border-radius: 50%; border: 4px solid #6b7280; margin: 20px auto; position: relative; background: radial-gradient(circle, #374151, #111827); touch-action: none; cursor: grab; }
+        .satellite-dish-pointer { width: 8px; height: 70px; background: #ef4444; position: absolute; bottom: 50%; left: calc(50% - 4px); transform-origin: bottom center; border-radius: 4px; }
+        .simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 280px; margin: 15px auto; }
+        .simon-quadrant { width: 100%; aspect-ratio: 1; border-radius: 16px; border: 4px solid #000; cursor: pointer; opacity: 0.4; transition: opacity 0.1s; }
+        .simon-quadrant:active { transform: scale(0.96); }
+        .virus-quarantine-field { width: 100%; height: 260px; background: #020617; border: 3px solid #1e293b; border-radius: 16px; position: relative; overflow: hidden; margin: 12px 0; }
+        .virus-bubble { width: 30px; height: 30px; border-radius: 50%; position: absolute; cursor: pointer; animation: fallLinear 2.5s linear forwards; }
+        @keyframes fallLinear { from { top: -40px; } to { top: 270px; } }
+        .location-toggle { display: flex; justify-content: center; gap: 10px; margin: 10px 0; }
+        .toggle-btn { background: #334155; color: #fff; border: 3px solid #475569; box-shadow: 0 4px 0 #000; border-radius: 12px; padding: 8px 16px; font-size: 1.1rem; }
+        .toggle-btn.active { background: var(--button-color); color: #000; border-color: #fff; }
+        
+        /* تجميل مدخلات الصور والكاميرا الميدانية */
+        .camera-capture-box { background: rgba(15,23,42,0.6); padding: 12px; border-radius: 14px; border: 2px dashed #64748b; margin: 10px 0; text-align: center; }
+        .hidden-camera-input { display: none; }
+        .camera-preview-img { width: 100%; max-width: 140px; border-radius: 8px; margin-top: 10px; border: 2px solid #fff; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="player-identity-tag" class="player-identity-header" style="display: none;">
+        اللاعب الحالي: <span id="tag-name-display" style="color: var(--button-color);"></span>
+    </div>
+
+    <div id="global-task-section">
+        <h3>مؤشر إنجاز مهام السفينة الإجمالي (Task Bar)</h3>
+        <div class="task-bar-container"><div id="main-task-bar" class="task-bar-fill"></div></div>
+    </div>
+
+    <div id="screen-lobby" class="screen active">
+        <h1>AMONG US</h1>
+        <div class="panel">
+            <h3>تسجيل جولة اللعب المشترك</h3>
+            <input type="text" id="player-name" placeholder="أدخل اسمك الحقيقي..."><br><br>
+            <input type="text" id="party-code-input" placeholder="أدخل كود الـ Party للانضمام"><br><br>
+            <button class="btn-main" onclick="handleLobby('create')">إنشاء جولة جديدة 👑</button>
+            <button class="btn-crew" onclick="handleLobby('join')">انضمام عبر الكود 🔑</button>
+        </div>
+    </div>
+
+    <div id="screen-waiting" class="screen">
+        <h2>قاعة انتظار المركبة</h2>
+        <div class="panel">
+            <h1>كود الغرفة: <span id="display-party-code" style="color: #facc15;"></span></h1>
+            <p style="font-weight: 800;">أعطِ هذا الكود لأصدقائك ليدخلوا معك فوراً من هواتفهم.</p>
+            <hr style="border-color: #334155;">
+            <h3>المتواجدون الآن (<span id="players-count">0</span>):</h3>
+            <div id="waiting-players-list" style="font-size: 1.6rem; color: var(--crew-color); font-weight: 900; margin: 15px 0; text-shadow: 2px 2px 0 #000;"></div>
+            
+            <div id="leader-settings" style="display: none; border-top: 2px dashed #334155; padding-top: 15px;">
+                <label style="font-weight:800;">موقع اللعبة الحالية:</label>
+                <div class="location-toggle">
+                    <button type="button" id="loc-home" class="toggle-btn active" onclick="setGameLocation('house')">🏠 البيت</button>
+                    <button type="button" id="loc-forest" class="toggle-btn" onclick="setGameLocation('forest')">🌲 الغابة</button>
+                </div>
+
+                <label style="font-weight:800;">وضع المراقب للمشرف (isSpectatorMode):</label><br>
+                <select id="spectator-mode-select" style="width: auto; margin: 10px 0;">
+                    <option value="false">تعطيل (قبول تلقائي وسريع) ⚡</option>
+                    <option value="true">تفعيل (مراجعة مباشرة وبث حي للـ Log) 🪪</option>
+                </select><br>
+
+                <label style="font-weight:800;">عدد الـ Imposters المندسين:</label><br>
+                <select id="imposter-count" style="width: auto; margin: 10px 0;"><option value="1">1 غدار</option><option value="2">2 غدارين</option></select><br>
+                
+                <label style="font-weight:800;">وقت النقاش والتصويت (ثانية):</label><br>
+                <input type="number" id="vote-duration-input" value="45" style="width: 80px; margin-bottom: 10px;"><br>
+
+                <label style="cursor: pointer; font-size: 1.2rem; color: var(--button-color); font-weight:900;">
+                    <input type="checkbox" id="show-voters-identity-checkbox" checked style="width: auto; transform: scale(1.4); margin-left: 8px;">
+                    إظهار هوية المصوّت بعد الانتهاء 🪪
+                </label><br><br>
+
+                <label style="font-weight:800;">وقت إعادة شحن القتل (ثانية):</label><br>
+                <input type="number" id="kill-cooldown" value="30" style="width: 80px;"><br><br>
+                
+                <button class="btn-danger" onclick="signalStartGame()">انطلاق وتوزيع الأدوار! 🏁</button>
+            </div>
+            <p id="client-wait-msg" style="display: none; color: #94a3b8; font-weight:800;">بانتظار أن يطلق قائد الغرفة المركبة الفضائية...</p>
+            
+            <hr style="border-color: #334155;">
+            <button class="btn-skip" onclick="leavePartyRoom(false)" style="background-color: #ef4444; color: #fff; width: 90%; margin-top: 5px;">مغادرة قاعة الانتظار 🚪</button>
+        </div>
+    </div>
+
+    <div id="screen-reveal" class="screen">
+        <div class="panel" id="role-box" style="padding: 30px 20px; border-width: 5px;">
+            <div id="reveal-screen-content">
+                <img src="sh.jpg" alt="SHHH!" class="shhh-image-container" onerror="this.style.display='none';">
+                <h1 id="role-title">جاري الفحص...</h1>
+                <p id="role-desc" style="font-size: 1.6rem; font-weight: 900; text-shadow: 2px 2px 0 #000;"></p>
+                
+                <div id="co-imposters-box" style="display: none; background: #2d0a0a; padding: 10px; border-radius: 12px; border: 3px solid var(--imposter-color); margin-top: 15px;">
+                    <p style="color: var(--imposter-color); font-weight: 900; margin: 0;">الخونة المساعدون معك:</p>
+                    <div id="co-imposters-list" style="font-weight: 900; font-size: 1.5rem; text-shadow: 2px 2px 0 #000;"></div>
+                </div>
+            </div>
+            <br>
+            <button class="btn-main" onclick="goToGameplay()">دخول السفينة وبدء الحركة 🌍</button>
+        </div>
+    </div>
+
+    <div id="screen-gameplay" class="screen">
+        <h2 id="gameplay-role-badge">المواطن</h2>
+        
+        <div class="panel" style="border-color: #475569; padding: 10px; background: rgba(147, 51, 234, 0.2);">
+            <button class="btn-main" style="background: #a855f7; color: white;" onclick="showMyIdentityModal()">إظهار هوية اللاعب الخاصة بي 🪪</button>
+        </div>
+
+        <div id="admin-spectator-panel" class="panel" style="display:none; border-color: #facc15; background: rgba(250,204,21,0.05);">
+            <h3 style="color: #facc15;">🔍 البث الحي لمهام اللاعبين المعلقة</h3>
+            <div id="admin-log-container" style="text-align:right; font-size:1rem; max-height:150px; overflow-y:auto; background:#0f172a; padding:8px; border-radius:8px;"></div>
+        </div>
+
+        <div id="imposter-tools" class="panel" style="display: none; border-color: var(--imposter-color); background: rgba(220, 38, 38, 0.15);">
+            <h3 style="color: var(--imposter-color);" id="imposter-panel-title">لوحة المندس السرية 💀</h3>
+            <div id="imposter-kill-section">
+                <p style="font-weight:800; font-size:1.2rem;">حالة خنجر القتل: <span id="kill-timer" style="font-weight: 900; color: var(--imposter-color);">شحن...</span></p>
+                <button class="btn-danger" id="btn-kill-action" onclick="openScanner('kill')">تنفيذ قتل 🔪</button>
+            </div>
+            <button class="btn-sabotage" id="btn-sabotage-action" onclick="signalSabotage()">إحداث تخريب عام في البيت ⚠️</button>
+        </div>
+
+        <div class="panel">
+            <h3 id="task-title-header">قائمة مهامك الـ 10 العشوائية المخصصة</h3>
+            <div id="tasks-list-container"></div>
+            <hr style="border-color: #334155;">
+            
+            <button class="btn-report" id="btn-emergency-report" onclick="openScanner('report')">🚨 إبلاغ عن جثة / اجتماع طارئ</button>
+        </div>
+        
+        <div id="ghost-chat-section" class="panel ghost-chat-wrapper" style="display: none;">
+            <h3 style="color: var(--ghost-color); margin:0 0 10px 0;">🔮 راديو اتصال الأشباح (السرّي)</h3>
+            <div id="ghost-chat-messages" class="ghost-chat-box"></div>
+            <div class="ghost-chat-input-row">
+                <button class="btn-main" onclick="sendGhostMessage()">إرسال 💬</button>
+                <input type="text" id="ghost-msg-input" placeholder="اكتب هنا.. لا يسمعك الأحياء!">
+            </div>
+        </div>
+
+        <div class="panel" style="border-color: #334155; padding: 10px; background: rgba(15, 23, 42, 0.6);">
+            <button class="btn-skip" onclick="leavePartyRoom(true)" style="background-color: #b91c1c; color: white; font-size: 1.1rem; padding: 10px 20px; box-shadow: 0 4px 0 #000; margin: 0;">الانسحاب ومغادرة الغرفة 🚪</button>
+        </div>
+    </div>
+
+    <div id="task-modal" class="custom-modal">
+        <div class="modal-content" style="border-color: var(--crew-color); max-width: 480px;">
+            <h2 id="modal-task-title" style="color: var(--button-color);">المهمة</h2>
+            <p id="modal-task-desc" style="font-weight: 800; font-size: 1.1rem; color: #cbd5e1;"></p>
+            <div id="modal-task-interactive-area" style="margin: 15px 0;"></div>
+            <button class="btn-skip" onclick="closeTaskModal(true)">إغلاق وإلغاء ❌</button>
+        </div>
+    </div>
+
+    <div id="screen-scanner" class="screen">
+        <h2 id="scanner-instruction" style="color: var(--button-color);">وجه الكاميرا نحو الكود</h2>
+        <div id="reader"></div>
+        <br>
+        <button class="btn-skip" onclick="closeScannerAndReturn()">← إلغاء والعودة للخلف</button>
+    </div>
+
+    <div id="screen-meeting" class="screen">
+        <h1>EMERGENCY MEETING</h1>
+        <div class="panel">
+            <h2 style="color: var(--button-color);">الوقت المتبقي: <span id="meeting-countdown-timer">--</span> ثانية</h2>
+            <p id="voting-status-msg" style="color: #e2e8f0; font-weight: 900; font-size: 1.25rem;">صوتوا الآن بالضغط على الهدف أو اختر الامتناع:</p>
+            
+            <div class="vote-grid" id="vote-players-grid"></div>
+            
+            <div id="skip-vote-container" style="margin-top: 15px;">
+                <button class="btn-skip" id="btn-skip-vote-action" onclick="registerLocalVote('skip')" style="width: 90%;">امتناع عن التصويت (Skip Vote)</button>
+                <div id="skip-voters-list" class="voters-names-list" style="display:none; width:85%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="custom-modal">
+        <div class="modal-content">
+            <h2 id="custom-alert-title" style="color: var(--button-color);">تنبيه من المركبة</h2>
+            <p id="custom-alert-text" style="font-size: 1.4rem; font-weight: 900; color: #fff; text-shadow: 1px 1px 0 #000;"></p>
+            <button class="btn-main" onclick="closeCustomModal()">حسناً وعودة 🫡</button>
+        </div>
+    </div>
+
+    <div id="identity-modal" class="custom-modal">
+        <div class="modal-content" style="border-color: #a855f7;">
+            <h2>هويتك الفضائية الحية</h2>
+            <p style="font-weight: 800;">اجعل الـ Imposter يمسح هذا الرمز إذا تمكن من الإيقاع بك بجانبه تماماً!</p>
+            <div id="qrcode-identity-box"></div>
+            <br>
+            <h3 style="color: var(--button-color); margin: 0;">الرمز السري: <span id="identity-text-code"></span></h3>
+            <br>
+            <button class="btn-skip" onclick="document.getElementById('identity-modal').style.display='none'">إخفاء الهوية ❌</button>
+        </div>
+    </div>
+
+    <div id="sabotage-alert">
+        <h1 style="font-size: 3.5rem; margin: 0; color: #fff; text-shadow: 4px 4px 0 #000;">⚠️ تخريب طارئ في البيت ⚠️</h1>
+        <p style="font-size: 1.6rem; font-weight: 900; text-shadow: 2px 2px 0 #000;">انطلقوا فوراً لغرفة الطوارئ لإصلاح الخلل بمسح الـ QR قبل فوات الأوان!</p>
+        <h1 id="sabotage-countdown" style="font-size: 6rem; color: #facc15; text-shadow: 5px 5px 0 #000;">60</h1>
+        <button class="btn-main" onclick="openScanner('sabotage')">مسح كود إصلاح الطوارئ 🛠️</button>
+    </div>
+    
+    <div id="ejection-screen">
+        <h1 id="ejection-text" style="font-size: 2.5rem; text-align:center; text-shadow: 3px 3px 0 #000; color: #ffffff; line-height: 1.6;"></h1>
+    </div>
+
+    <script>
+        function changeScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        const firebaseConfig = {
+            databaseURL: "https://among-us-real-59af8-default-rtdb.firebaseio.com/" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let partyCode = "";
+        let myName = "";
+        let isLeader = false;
+        let myRole = "Crewmate";
+        let isDead = false;
+        let killCooldown = 30;
+        let killTimerInterval;
+        let isKillReady = false;
+        let html5QrcodeScanner = null;
+        let currentScanMode = "";
+        let currentScreenBeforeScanner = "screen-gameplay"; 
+        let localHasVoted = false; 
+        
+        let emergencyCooldownInterval = null;
+        let isEmergencyReady = true;
+        let wakeLockObject = null;
+        let selectedLocation = "house"; 
+        let currentActiveTaskId = null; 
+        let sabotageCountdownInterval = null;
+
+        // مصفوفة المهمات الـ 20 الكاملة والمحدّثة بنظام الألعاب الفعلي
+        const ALL_TASKS_POOL = [
+            { id: 1, text: "توصيل الأسلاك المعقدة (Wire Fix 15)", desc: "قم بسحب كل سلك ملون من اليسار برسم خط حقيقي بإصبعك وتوصيله بالمقبس المطابق له باللون على اليمين لـ 3 شاشات متتالية.", location: ["house", "forest"], type: "wires" },
+            { id: 2, text: "تحميل البيانات المستمر (Downloading Data)", desc: "اضغط مطولاً وباستمرار دون رفع إصبعك على زر بدء التحميل حتى يكتمل شريط المؤشر بنسبة 100% كاملة.", location: ["house", "forest"], type: "download" },
+            { id: 3, text: "السر العسكري الشفرة الأمنية (Pass the Message)", desc: "نظام التحقق المتبادل؛ تواصل مع زملائك لتسجيل أو إدخال كود السر العشوائي المصدق.", location: ["house", "forest"], type: "pass_message" },
+            { id: 4, text: "لعبة الحساب السريعة (Math Test)", desc: "قم بحل 10 مسائل رياضية عشوائية متتالية تظهر أرقامها ومعادلاتها بشكل صحيح بالاتجاه المناسب.", location: ["house", "forest"], type: "math" },
+            { id: 5, text: "ميزان الذهب الحركي (Gyroscope Maze)", desc: "استخدم مستشعر الميل الفعلي لهاتفك لتوجيه الكرة الصفراء وتثبيتها داخل الدائرة الخضراء بالمركز لمدة 1.5 ثانية متواصلة.", location: ["house", "forest"], type: "gyro" },
+            { id: 6, text: "تنظيف الشاشة الملوثة (Screen Wiper)", desc: "امسح الطبقة المعتمة الداكنة تماماً بإصبعك حتى تنقشع وتصل نسبة نقاء ونظافة الزجاج إلى 100% بالكامل.", location: ["house", "forest"], type: "wiper" },
+            { id: 7, text: "عداد الخطوات الاضطراري (Step Counter)", desc: "امشِ أو اركض حركياً في مكانك الفعلي ليرصد حساس الحركة الميكانيكي للهاتف 100 خطوة حقيقية.", location: ["house", "forest"], type: "steps" },
+            { id: 8, text: "تعديل التردد اللاسلكي (Radio Tune)", desc: "حرك شريط السلايدر بدقة لتطابق تردد الموجة الجيبية المشوشة مع الموجة المستهدفة الثابتة.", location: ["house", "forest"], type: "radio" },
+            { id: 9, text: "بطاقة الهوية السريعة (Card Swipe)", desc: "اسحب بطاقتك الممغنطة الذكية بإصبعك من اليسار إلى اليمين بسرعة معتدلة ومثالية دون تسرع أو تباطؤ شديد.", location: ["house", "forest"], type: "swipe" },
+            { id: 10, text: "شحن الوقود (Fuel Refill)", desc: "اضغط مطولاً لضخ السائل في الخزان وارفع إصبعك فوراً عند وصول التعبئة للخط الأخضر المستهدف تماماً.", location: ["house", "forest"], type: "fuel" },
+            { id: 11, text: "ترتيب عينات المختبر (Anomaly Sorting)", desc: "استخدم السحب والإسقاط الحركي لفرز وترتيب المربعات الملونة ووضع كل منها داخل الفتحة المطابقة لها باللون.", location: ["house", "forest"], type: "sorting" },
+            { id: 12, text: "نمط القفل الإلكتروني (Pattern Lock)", desc: "قم برسم النمط الهندسي المطلوب منك وتوصيل النقاط الحية بحركة سحب واحدة متصلة لفتح القفل التلقائي.", location: ["house", "forest"], type: "pattern" },
+            { id: 13, text: "توجيه الهوائي اللاسلكي (Satellite Align)", desc: "قم بتدوير طبق الاستقبال الفضائي دائرياً بإصبعك ببطء حتى تصل قوة إشارة البث إلى 100% لثانيتين متواصلتين.", location: ["house", "forest"], type: "satellite" },
+            { id: 14, text: "تتابع الأنوار الأمنية (Simon Says)", desc: "راقب وميض المربعات الملونة العشوائية بدقة وأعد نقرها بنفس الترتيب التتابعي التصاعدي لـ 3 مراحل.", location: ["house", "forest"], type: "simon" },
+            { id: 15, text: "فرز الفيروسات الرقمية (Virus Quarantine)", desc: "انقر بسرعة على الكرات الحمراء المتساقطة لتفجيرها قبل القاع وتجنب لمس الكرات الخضراء حتى تدمر 15 فيروساً خبيثاً.", location: ["house", "forest"], type: "virus" },
+            { id: 16, text: "إعادة تدوير النفايات الميدانية", desc: "اجمع 3 مخلفات فارغة من الأرض واقعياً وضعها بسلة المهملات، ثم التقط صورة حية واحدة واضحة لها لإرسالها.", location: ["house", "forest"], type: "recycling" },
+            { id: 17, text: "البصمات الجنائية العشوائية", desc: "ابحث ميدانياً عن أغراض تطابق اللون المختار عشوائياً، والتقط 3 صور حية في ألبوم المهام للأدلة.", location: ["house", "forest"], type: "fingerprints" },
+            { id: 19, text: "عينة أوراق الشجر البيئية", desc: "ابحث في أرجاء الغابة عن ورقة جافة تماماً وأخرى خضراء يانعة والتقط لهما صورة واضحة معاً على كف يدك كدليل بيئي.", location: ["forest"], type: "leaf" },
+            { id: 20, text: "تحديد الشمال الجغرافي والقبلة", desc: "در بجسدك مستعيناً بالبوصلة المغناطيسية الحقيقية للهاتف حتى تتجه نحو الشمال الدقيق (زاوية 0) وتثبت لثانيتين.", location: ["house", "forest"], type: "compass" }
+        ];
+
+        let myTasks = []; 
+
+        function setGameLocation(loc) {
+            selectedLocation = loc;
+            document.getElementById('loc-home').classList.remove('active');
+            document.getElementById('loc-forest').classList.remove('active');
+            if(loc === 'house') document.getElementById('loc-home').classList.add('active');
+            else document.getElementById('loc-forest').classList.add('active');
+        }
+
+        // محرك الاختيار العشوائي الصارم: اختيار 10 مهام فقط بعد تصفيتها حسب الموقع الحقيقي للجولة
+        function generateRandomTasksForMe(locationFromDb) {
+            let filtered = ALL_TASKS_POOL.filter(t => t.location.includes(locationFromDb));
+            let shuffled = filtered.sort(() => 0.5 - Math.random());
+            let selected = shuffled.slice(0, 10);
+            myTasks = selected.map(t => {
+                return { id: t.id, text: t.text, desc: t.desc, type: t.type, done: false };
+            });
+        }
+
+        function showCustomModal(title, text) {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-text').innerText = text;
+            document.getElementById('custom-alert-modal').style.display = "flex";
+        }
+        function closeCustomModal() {
+            document.getElementById('custom-alert-modal').style.display = "none";
+        }
+
+        function showMyIdentityModal() {
+            document.getElementById('qrcode-identity-box').innerHTML = "";
+            document.getElementById('identity-text-code').innerText = myName;
+            new QRCode(document.getElementById('qrcode-identity-box'), {
+                text: myName, width: 200, height: 200
+            });
+            document.getElementById('identity-modal').style.display = "flex";
+        }
+
+        async function activateScreenWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLockObject = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) { console.log(err.message); }
+        }
+
+        function handleLobby(action) {
+            myName = document.getElementById('player-name').value.trim();
+            if (!myName) { showCustomModal("خطأ في الاسم", "الرجاء إدخل اسمك الفضائي أولاً!"); return; }
+
+            if (action === 'join') {
+                let checkParty = document.getElementById('party-code-input').value.trim();
+                if (!checkParty) { showCustomModal("كود مفقود", "الرجاء كتابة كود الـ Party للانضمام!"); return; }
+                
+                db.ref('parties/' + checkParty + '/players/' + myName).once('value', nameSnap => {
+                    if (nameSnap.exists()) {
+                        showCustomModal("اسم مكرر 🛡️", "هذا الاسم مستخدم حالياً داخل المركبة! الرجاء اختيار اسم آخر.");
+                    } else { executeLobbyLogin(action, checkParty); }
+                });
+            } else { executeLobbyLogin(action, ""); }
+        }
+
+        function executeLobbyLogin(action, joinedCode) {
+            document.getElementById('tag-name-display').innerText = myName;
+            document.getElementById('player-identity-tag').style.display = "block";
+
+            if (action === 'create') {
+                isLeader = true;
+                partyCode = Math.floor(1000 + Math.random() * 9000).toString();
+                db.ref('parties/' + partyCode).set({
+                    status: "waiting", leader: myName, sabotage: false, meeting: false, taskProgress: 0, killCooldown: 30,
+                    voteDuration: 45, showVotersIdentity: true, meetingStatus: "idle", meetingFinalResultText: "",
+                    gameLocation: selectedLocation, isSpectatorMode: document.getElementById('spectator-mode-select').value === "true"
+                });
+            } else {
+                isLeader = false;
+                partyCode = joinedCode;
+            }
+
+            sessionStorage.setItem('among_us_reality_party', partyCode);
+            sessionStorage.setItem('among_us_reality_name', myName);
+
+            db.ref('parties/' + partyCode + '/players/' + myName).set({
+                name: myName, isAlive: true, role: "Crewmate", doneTasksCount: 0, currentVote: "none"
+            });
+
+            activateScreenWakeLock();
+            setupPartyListeners();
+        }
+
+        function setupPartyListeners() {
+            document.getElementById('display-party-code').innerText = partyCode;
+            changeScreen('screen-waiting');
+
+            if (isLeader) document.getElementById('leader-settings').style.display = "block";
+            else document.getElementById('client-wait-msg').style.display = "block";
+
+            db.ref('parties/' + partyCode + '/players').on('value', snapshot => {
+                const playersData = snapshot.val();
+                if (!playersData) return;
+
+                const listContainer = document.getElementById('waiting-players-list');
+                listContainer.innerHTML = "";
+                let count = 0;
+                for (let p in playersData) {
+                    listContainer.innerHTML += `• ${playersData[p].name} <br>`;
+                    count++;
+                }
+                document.getElementById('players-count').innerText = count;
+
+                if (playersData[myName] && playersData[myName].isAlive === false && isDead === false) {
+                    isDead = true;
+                    handleInstantDeath();
+                }
+
+                checkGameEndConditions(playersData);
+            });
+
+            db.ref('parties/' + partyCode + '/status').on('value', status => {
+                if (status.val() === "playing") {
+                    db.ref('parties/' + partyCode + '/gameLocation').once('value', locSnap => {
+                        determineMyRole(locSnap.val() || "house");
+                    });
+                }
+            });
+
+            // حل ثغرة التخريب والـ Refresh والـ Session Storage المزامنة
+            db.ref('parties/' + partyCode + '/sabotage').on('value', snap => {
+                if (snap.val() === true) {
+                    db.ref('parties/' + partyCode + '/sabotageTargetTime').once('value', timeSnap => {
+                        if(timeSnap.exists()) {
+                            showSabotageUI(timeSnap.val());
+                        }
+                    });
+                } else {
+                    document.getElementById('sabotage-alert').style.display = "none";
+                    clearInterval(sabotageCountdownInterval);
+                    sessionStorage.removeItem('sabotage_target_timestamp');
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/meeting').on('value', snap => {
+                if (snap.val() === true) {
+                    if(currentActiveTaskId !== null) {
+                        closeTaskModal(true);
+                    }
+                    triggerLocalMeetingUI();
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/isSpectatorMode').on('value', specSnap => {
+                if(specSnap.val() === true && isLeader) {
+                    document.getElementById('admin-spectator-panel').style.display = "block";
+                    db.ref('parties/' + partyCode + '/adminLogs').on('value', logSnap => {
+                        const container = document.getElementById('admin-log-container');
+                        container.innerHTML = "";
+                        let logs = logSnap.val();
+                        for(let l in logs) {
+                            let item = logs[l];
+                            container.innerHTML += `<div>[${item.timestamp}] - <b>${item.player}</b>: ${item.task} (${item.details})</div>`;
+                        }
+                    });
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/meetingTimer').on('value', snap => {
+                if (snap.val() !== null && document.getElementById('screen-meeting').classList.contains('active')) {
+                    document.getElementById('meeting-countdown-timer').innerText = snap.val();
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/meetingStatus').on('value', snap => {
+                if (snap.val() === "revealing" && document.getElementById('screen-meeting').classList.contains('active')) {
+                    localHasVoted = true;
+                    document.getElementById('btn-skip-vote-action').disabled = true;
+                    disableAllVotingCards();
+                    revealLiveVotesToAll();
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/meetingFinalResultText').on('value', snap => {
+                let text = snap.val();
+                const ejScreen = document.getElementById('ejection-screen');
+                const ejText = document.getElementById('ejection-text');
+                if (text && text !== "") {
+                    ejScreen.style.display = "flex";
+                    ejText.innerText = text;
+                } else {
+                    if (ejScreen.style.display === "flex") {
+                        ejScreen.style.display = "none";
+                        goToGameplay();
+                        startEmergencyCooldown();
+                    }
+                }
+            });
+
+            db.ref('parties/' + partyCode + '/taskProgress').on('value', snap => {
+                const progress = snap.val() || 0;
+                document.getElementById('main-task-bar').style.width = progress + "%";
+                
+                if (progress >= 100 && typeof myTasks !== 'undefined' && myTasks && myTasks.length > 0) {
+                    showCustomModal("فوز ساحق! 🎉", "أكمل المواطنون جميع المهام المشتركة العشوائية بنجاح واكتمل شريط الطاقة الرئيسي!");
+                    setTimeout(() => {
+                        sessionStorage.clear();
+                        location.reload();
+                    }, 5000);
+                }
+            });
+        }
+
+        function signalStartGame() {
+            const chosenImpostersCount = parseInt(document.getElementById('imposter-count').value) || 1;
+            
+            db.ref('parties/' + partyCode + '/players').once('value', snapshot => {
+                const playersData = snapshot.val();
+                if (!playersData) return;
+                
+                const totalPlayers = Object.keys(playersData).length;
+                
+                // القيود الصارمة لمنع دخول المجموعات الخاطئة
+                if (chosenImpostersCount === 1) {
+                    if (totalPlayers < 3) {
+                        showCustomModal("تعذر انطلاق المركبة ⚠️", "ممنوع بدء اللعبة بامبوستر واحد مع لاعب واحد فقط! يجب توفر لاعبين اثنين على الأقل غير المندس لتبدأ الجولة (المجموع 3 على الأقل).");
+                        return;
+                    }
+                } else if (chosenImpostersCount === 2) {
+                    if (totalPlayers < 5) {
+                        showCustomModal("تعذر انطلاق المركبة ⚠️", "ممنوع بدء اللعبة بـ 2 امبوسترز مع أقل من 3 لاعبين مواطنين! يجب توفر 3 مواطنين على الأقل (المجموع 5 لاعبين كحد أدنى).");
+                        return;
+                    }
+                }
+                
+                const voteDuration = parseInt(document.getElementById('vote-duration-input').value) || 45;
+                const killCd = parseInt(document.getElementById('kill-cooldown').value) || 30;
+                const isSpec = document.getElementById('spectator-mode-select').value === "true";
+                const showVoters = document.getElementById('show-voters-identity-checkbox').checked;
+                
+                let keys = Object.keys(playersData);
+                let shuffled = keys.sort(() => 0.5 - Math.random());
+                let imposters = shuffled.slice(0, chosenImpostersCount);
+                
+                let updates = {};
+                keys.forEach(k => {
+                    let r = imposters.includes(k) ? "Imposter" : "Crewmate";
+                    updates['players/' + k + '/role'] = r;
+                });
+                
+                updates['status'] = "playing";
+                updates['killCooldown'] = killCd;
+                updates['voteDuration'] = voteDuration;
+                updates['isSpectatorMode'] = isSpec;
+                updates['showVotersIdentity'] = showVoters;
+                updates['gameLocation'] = selectedLocation;
+                
+                db.ref('parties/' + partyCode).update(updates);
+            });
+        }
+
+        function checkGameEndConditions(playersData) {
+            db.ref('parties/' + partyCode + '/status').once('value', statusSnap => {
+                if (statusSnap.val() !== "playing") return;
+                
+                let aliveCrew = 0;
+                let aliveImposters = 0;
+                
+                for (let p in playersData) {
+                    if (playersData[p].isAlive) {
+                        if (playersData[p].role === "Imposter") {
+                            aliveImposters++;
+                        } else {
+                            aliveCrew++;
+                        }
+                    }
+                }
+                
+                if (aliveImposters === 0) {
+                    db.ref('parties/' + partyCode + '/status').set("ended");
+                    sessionStorage.clear();
+                    showCustomModal("انتصار عظيم! 🏆", "تم طرد وتصفية جميع الخونة المندسين من المركبة بنجاح!");
+                    setTimeout(() => location.reload(), 6000);
+                    return;
+                }
+                
+                if (aliveImposters >= aliveCrew) {
+                    db.ref('parties/' + partyCode + '/status').set("ended");
+                    sessionStorage.clear();
+                    showCustomModal("خسارة فادحة! 💀", "تساوى أو تفوق عدد الغدارين مع عدد المواطنين الأحياء داخل الجولة الحالية! انتصر الخونة.");
+                    setTimeout(() => location.reload(), 6000);
+                }
+            });
+        }
+
+        function determineMyRole(locationFromDb) {
+            db.ref('parties/' + partyCode + '/players/' + myName + '/role').once('value', snap => {
+                myRole = snap.val() || "Crewmate";
+                generateRandomTasksForMe(locationFromDb);
+                
+                document.getElementById('global-task-section').style.display = "block";
+                changeScreen('screen-reveal');
+                
+                const title = document.getElementById('role-title');
+                const desc = document.getElementById('role-desc');
+                const rBox = document.getElementById('role-box');
+                
+                if (myRole === "Imposter") {
+                    title.innerText = "IMPOSTER (مندس غدار)";
+                    title.style.color = "var(--imposter-color)";
+                    desc.innerText = "تسلل بين اللاعبين، قم بتنفيذ عمليات اغتيال خاطفة دون لفت الأنظار، وأحدث تخريبات طارئة لمنعهم من النجاة!";
+                    rBox.style.borderColor = "var(--imposter-color)";
+                    
+                    db.ref('parties/' + partyCode + '/players').once('value', pSnap => {
+                        let data = pSnap.val();
+                        let list = [];
+                        for(let p in data) {
+                            if(data[p].role === "Imposter" && p !== myName) list.push(p);
+                        }
+                        if(list.length > 0) {
+                            document.getElementById('co-imposters-box').style.display = "block";
+                            document.getElementById('co-imposters-list').innerText = list.join(' , ');
+                        }
+                    });
+                } else {
+                    title.innerText = "CREWMATE (مواطن صالح)";
+                    title.style.color = "var(--crew-color)";
+                    desc.innerText = "أنت مواطن وفيّ، تحرك في أرجاء المنطقة لإنجاز الـ 10 مهام الموكلة إليك، وراقب التحركات للإبلاغ عن الجثث فوراً!";
+                    rBox.style.borderColor = "var(--crew-color)";
+                }
+            });
+        }
+
+        function goToGameplay() {
+            changeScreen('screen-gameplay');
+            const badge = document.getElementById('gameplay-role-badge');
+            
+            if (isDead) {
+                badge.innerText = "الوضع الحالي: ميت (شبح) 👻";
+                badge.style.color = "var(--ghost-color)";
+                document.getElementById('ghost-chat-section').style.display = "block";
+                setupGhostChatListener();
+                if (myRole === "Imposter") {
+                    document.getElementById('imposter-tools').style.display = "block";
+                    document.getElementById('imposter-kill-section').style.display = "none";
+                }
+            } else if (myRole === "Imposter") {
+                badge.innerText = "الدور: المندس الغدار 💀";
+                badge.style.color = "var(--imposter-color)";
+                document.getElementById('imposter-tools').style.display = "block";
+                db.ref('parties/' + partyCode + '/killCooldown').once('value', snap => {
+                    killCooldown = snap.val() || 30;
+                    startKillCooldownTimer(killCooldown);
+                });
+            } else {
+                badge.innerText = "الدور: مواطن صالح 🛡️";
+                badge.style.color = "var(--crew-color)";
+            }
+            
+            renderMyTasksList();
+        }
+
+        function renderMyTasksList() {
+            const container = document.getElementById('tasks-list-container');
+            container.innerHTML = "";
+            
+            if (myTasks.length === 0) {
+                container.innerHTML = `<div style="color: #64748b; font-weight:800; padding:10px;">لا يوجد مهام نشطة حالياً في هذه الجولة (0 مهام).</div>`;
+                return;
+            }
+            
+            myTasks.forEach((t, index) => {
+                let div = document.createElement('div');
+                div.className = "task-item" + (t.done ? " completed" : "");
+                div.innerHTML = `<span>${t.text}</span> <span>${t.done ? "✅ مُكتملة" : "⏳ جارية"}</span>`;
+                if (!t.done && !isDead) {
+                    div.onclick = () => openTaskInteractiveModal(index);
+                }
+                container.appendChild(div);
+            });
+        }
+
+        // بناء لوجيك المهام التفاعلية والحركية الحقيقية والمبدعة داخل الـ UI وليس مجرد أزرار وهمية
+        function openTaskInteractiveModal(index) {
+            let task = myTasks[index];
+            currentActiveTaskId = index;
+            
+            document.getElementById('modal-task-title').innerText = task.text;
+            document.getElementById('modal-task-desc').innerText = task.desc;
+            
+            const area = document.getElementById('modal-task-interactive-area');
+            area.innerHTML = "";
+            
+            // 1. مهمة توصيل الأسلاك المعقدة (Wire Fix 15) بواسطة Canvas حقيقي
+            if (task.type === "wires") {
+                let stage = 1;
+                let wireColors = ["red", "blue", "yellow", "pink"];
+                
+                function loadWireStage() {
+                    area.innerHTML = `<p style='font-weight:bold; color:var(--button-color)'>المرحلة المباشرة: ${stage} / 3</p>`;
+                    let container = document.createElement('div');
+                    container.className = "wire-canvas-container";
+                    container.innerHTML = `<canvas class="wire-canvas-element" id="wireCanvas"></canvas>`;
+                    
+                    // توليد النقاط الموزعة عشوائياً للمقابس على اليمين
+                    let shuffledRight = [...wireColors].sort(() => 0.5 - Math.random());
+                    
+                    wireColors.forEach((color, i) => {
+                        let leftDot = document.createElement('div');
+                        leftDot.style = `position:absolute; left:15px; top:${40 + i*60}px; width:18px; height:18px; border-radius:50%; background:${color}; z-index:10; border:2px solid #fff;`;
+                        container.appendChild(leftDot);
+                    });
+                    
+                    shuffledRight.forEach((color, i) => {
+                        let rightDot = document.createElement('div');
+                        rightDot.style = `position:absolute; right:15px; top:${40 + i*60}px; width:18px; height:18px; border-radius:50%; background:${color}; z-index:10; border:2px solid #fff;`;
+                        rightDot.setAttribute('data-color', color);
+                        rightDot.className = "right-socket-node";
+                        container.appendChild(rightDot);
+                    });
+                    
+                    area.appendChild(container);
+                    
+                    setTimeout(() => {
+                        let cv = document.getElementById('wireCanvas');
+                        if(!cv) return;
+                        cv.width = cv.parentElement.clientWidth;
+                        cv.height = cv.parentElement.clientHeight;
+                        let ctx = cv.getContext('2d');
+                        
+                        let activeColor = null;
+                        let startY = 0;
+                        let connectedCount = 0;
+                        
+                        cv.ontouchstart = (e) => {
+                            let rect = cv.getBoundingClientRect();
+                            let touchX = e.touches[0].clientX - rect.left;
+                            let touchY = e.touches[0].clientY - rect.top;
+                            
+                            if (touchX < 45) {
+                                let indexClicked = Math.floor((touchY - 20) / 60);
+                                if (indexClicked >= 0 && indexClicked < 4) {
+                                    activeColor = wireColors[indexClicked];
+                                    startY = 49 + indexClicked * 60;
+                                }
+                            }
+                        };
+                        
+                        cv.ontouchmove = (e) => {
+                            if (!activeColor) return;
+                            let rect = cv.getBoundingClientRect();
+                            let touchX = e.touches[0].clientX - rect.left;
+                            let touchY = e.touches[0].clientY - rect.top;
+                            
+                            ctx.clearRect(0, 0, cv.width, cv.height);
+                            // إعادة رسم الخطوط المكتملة السابقة إن وجدت في هذه المرحلة إن أردت، أو تتبع الخط الحالي
+                            ctx.beginPath();
+                            ctx.strokeStyle = activeColor;
+                            ctx.lineWidth = 4;
+                            ctx.moveTo(25, startY);
+                            ctx.lineTo(touchX, touchY);
+                            ctx.stroke();
+                        };
+                        
+                        cv.ontouchend = (e) => {
+                            if (!activeColor) return;
+                            let rect = cv.getBoundingClientRect();
+                            let change = e.changedTouches[0];
+                            let touchX = change.clientX - rect.left;
+                            let touchY = change.clientX - rect.top; // تقريبي للفحص الحركي
+                            
+                            if (touchX > cv.width - 50) {
+                                let rightIndex = Math.floor((change.clientY - rect.top - 20) / 60);
+                                if(rightIndex >= 0 && rightIndex < 4) {
+                                    let matchedColor = shuffledRight[rightIndex];
+                                    if (matchedColor === activeColor) {
+                                        connectedCount++;
+                                        if (connectedCount === 4) {
+                                            if (stage < 3) {
+                                                stage++;
+                                                loadWireStage();
+                                            } else {
+                                                pushToLiveAdminLog(task.text, "تم توصيل جميع الـ 12 سلكاً ملوناً بنجاح ومطابقة المقابس", "text", "Wire Fix Success");
+                                                completeActiveTaskLocal();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            activeColor = null;
+                            ctx.clearRect(0, 0, cv.width, cv.height);
+                        };
+                    }, 150);
+                }
+                loadWireStage();
+            } 
+            // 2. مهمة تحميل البيانات المستمر (Downloading Data) بالضغط المطول الصارم
+            else if (task.type === "download") {
+                let currentProgress = 0;
+                let downloadInterval = null;
+                
+                let btn = document.createElement('button');
+                btn.className = "download-btn-active";
+                btn.innerText = "اضغط مطولاً لبدء التحميل 📡";
+                
+                let barWrapper = document.createElement('div');
+                barWrapper.className = "task-bar-container";
+                barWrapper.style.margin = "15px 0";
+                let barFill = document.createElement('div');
+                barFill.className = "task-bar-fill";
+                barFill.style.width = "0%";
+                barWrapper.appendChild(barFill);
+                
+                let percentText = document.createElement('p');
+                percentText.style = "font-size:1.5rem; font-weight:900; color:#fff;";
+                percentText.innerText = "نسبة التقدم: 0%";
+                
+                area.appendChild(btn);
+                area.appendChild(barWrapper);
+                area.appendChild(percentText);
+                
+                function stopAndResetDownload() {
+                    clearInterval(downloadInterval);
+                    currentProgress = 0;
+                    barFill.style.width = "0%";
+                    percentText.innerText = "نسبة التقدم: 0% (تم التصفير لإفلات الزر!)";
+                }
+                
+                btn.ontouchstart = (e) => {
+                    e.preventDefault();
+                    clearInterval(downloadInterval);
+                    downloadInterval = setInterval(() => {
+                        currentProgress += 2;
+                        if(currentProgress > 100) currentProgress = 100;
+                        barFill.style.width = currentProgress + "%";
+                        percentText.innerText = `نسبة التقدم: ${currentProgress}%`;
+                        
+                        if (currentProgress >= 100) {
+                            clearInterval(downloadInterval);
+                            pushToLiveAdminLog(task.text, "تم تحميل كامل البيانات بنجاح في غضون 10 ثوان متواصلة دون إفلات", "text", "100% Downloaded");
+                            completeActiveTaskLocal();
+                        }
+                    }, 200);
+                };
+                
+                btn.ontouchend = stopAndResetDownload;
+                btn.onmousedown = btn.ontouchstart;
+                btn.onmouseup = stopAndResetDownload;
+            }
+            // 3. مهمة السر العسكري (Pass the Message) المرتبطة سحابياً
+            else if (task.type === "pass_message") {
+                let generatedSecretCode = "SEC-" + Math.floor(1000 + Math.random() * 9000);
+                area.innerHTML = `
+                    <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px;">
+                        <p style="font-weight:900; color:var(--button-color);">[الشق أ - حامل الشفرة الأمني]</p>
+                        <p>شفرتك السرية المشفرة هي: <b style="font-size:1.5rem; color:#ef4444;">${generatedSecretCode}</b></p>
+                        <p style="font-size:0.95rem; color:#94a3b8;">تواصل سراً مع أحد زملائك واجعله يدخل الشفرة بالأسفل للمصادقة المزدوجة.</p>
+                        <hr style="border-color:#334155;">
+                        <p style="font-weight:900; color:var(--crew-color);">[الشق ب - استقبال السر والمصادقة]</p>
+                        <input type="text" id="secret-input-field" placeholder="أدخل الشفرة المستلمة هنا..." style="width:90%; margin-bottom:10px;"><br>
+                        <button class="btn-main" id="btn-verify-secret">تأكيد ومصادقة التشفير المزدوج 🔐</button>
+                    </div>
+                `;
+                setTimeout(() => {
+                    document.getElementById('btn-verify-secret').onclick = () => {
+                        let val = document.getElementById('secret-input-field').value.trim();
+                        if (val === generatedSecretCode) {
+                            pushToLiveAdminLog(task.text, "تمت المصادقة المزدوجة بنجاح وتطابق التشفير السري: " + generatedSecretCode, "text", val);
+                            completeActiveTaskLocal();
+                        } else {
+                            showCustomModal("خطأ في الشفرة", "الشفرة المدخلة غير مطابقة! يرجى التحقق من الخانة (أ).");
+                        }
+                    };
+                }, 100);
+            }
+            // 4. مهمة لعبة الحساب السريعة مع فرض الـ RTL Fix الإجباري الصارم
+            else if (task.type === "math") {
+                let mathStage = 1;
+                let currentNum1, currentNum2, currentSign, correctAnswer;
+                
+                function nextMathQuestion() {
+                    if (mathStage > 10) {
+                        pushToLiveAdminLog(task.text, "أكمل اللاعب حل 10 مسائل حسابية متتالية بنجاح دون أي خطأ برمي", "text", "Math 10/10 Complete");
+                        completeActiveTaskLocal();
+                        return;
+                    }
+                    
+                    currentNum1 = Math.floor(10 + Math.random() * 89);
+                    currentNum2 = Math.floor(10 + Math.random() * 89);
+                    currentSign = Math.random() > 0.5 ? "+" : "-";
+                    
+                    if (currentSign === "-") {
+                        if (currentNum1 < currentNum2) {
+                            let temp = currentNum1; currentNum1 = currentNum2; currentNum2 = temp;
+                        }
+                        correctAnswer = currentNum1 - currentNum2;
+                    } else {
+                        correctAnswer = currentNum1 + currentNum2;
+                    }
+                    
+                    area.innerHTML = `
+                        <p style="font-weight:bold; color:var(--crew-color)">المسألة الحالية: ${mathStage} / 10</p>
+                        <div style="direction: ltr; text-align: center; unicode-bidi: bidi-override; font-size:2.5rem; font-weight:900; background:#000; padding:15px; border-radius:12px; margin:15px 0; color:#4ade80; border:2px solid #334155;">
+                            ${currentNum1} ${currentSign} ${currentNum2} = ?
+                        </div>
+                        <input type="number" id="math-answer-input" placeholder="اكتب الناتج هنا..." style="width:80%; font-size:1.5rem;"><br><br>
+                        <button class="btn-main" id="btn-submit-math">تحقق وإرسال النتيجة 📐</button>
+                    `;
+                    
+                    setTimeout(() => {
+                        document.getElementById('math-answer-input').focus();
+                        document.getElementById('btn-submit-math').onclick = () => {
+                            let ans = parseInt(document.getElementById('math-answer-input').value);
+                            if (ans === correctAnswer) {
+                                mathStage++;
+                                nextMathQuestion();
+                            } else {
+                                showCustomModal("حساب خاطئ ❌", "النتيجة غير صحيحة، تم تصفير المحاولة والبدء من المسألة الأولى لضمان التحدي!");
+                                mathStage = 1;
+                                nextMathQuestion();
+                            }
+                        };
+                    }, 100);
+                }
+                nextMathQuestion();
+            }
+            // 5. مهمة ميزان الذهب الحركي (Gyroscope Maze) بواسطة حساس الاتجاه والدوران الفعلي
+            else if (task.type === "gyro") {
+                area.innerHTML = `
+                    <p style="font-size:0.95rem; color:#94a3b8; margin-bottom:5px;">قم بإمالة هاتفك الفعلي بجميع الاتجاهات لتثبيت الكرة الصفراء في الدائرة الخضراء بالمركز تماماً!</p>
+                    <div class="maze-gyro-container">
+                        <div class="maze-gyro-target"></div>
+                        <div class="maze-gyro-ball" id="gyroBall" style="top:20px; left:20px;"></div>
+                    </div>
+                    <p id="gyro-status-label" style="font-weight:bold; color:var(--button-color);">الوضع الحالي: جاري تتبع الزوايا الحركية...</p>
+                `;
+                
+                let bX = 20, bY = 20;
+                let insideTargetStartTime = null;
+                
+                function orientationHandler(event) {
+                    let cvBox = document.querySelector('.maze-gyro-container');
+                    let ball = document.getElementById('gyroBall');
+                    if(!cvBox || !ball) return;
+                    
+                    let limitX = cvBox.clientWidth - 22;
+                    let limitY = cvBox.clientHeight - 22;
+                    
+                    let gamma = event.gamma; // من -90 إلى 90 (يمين/يسار)
+                    let beta = event.beta;   // من -180 إلى 180 (أمام/خلف)
+                    
+                    bX += gamma * 0.12;
+                    bY += beta * 0.12;
+                    
+                    if(bX < 0 || bX > limitX || bY < 0 || bY > limitY) {
+                        if (navigator.vibrate) navigator.vibrate(100);
+                        bX = 20; bY = 20;
+                    }
+                    
+                    ball.style.left = bX + "px";
+                    ball.style.top = bY + "px";
+                    
+                    // حساب المسافة الهندسية عن المركز الدقيق للمنطقة الحاوية
+                    let centerX = cvBox.clientWidth / 2 - 11;
+                    let centerY = cvBox.clientHeight / 2 - 11;
+                    let dist = Math.sqrt(Math.pow(bX - centerX, 2) + Math.pow(bY - centerY, 2));
+                    
+                    let label = document.getElementById('gyro-status-label');
+                    if (dist < 18) {
+                        if (insideTargetStartTime === null) {
+                            insideTargetStartTime = Date.now();
+                        }
+                        let elapsed = (Date.now() - insideTargetStartTime) / 1000;
+                        label.innerText = `تثبيت رائع متواصل: ${elapsed.toFixed(1)} / 1.5 ثانية 🎯`;
+                        label.style.color = "#22c55e";
+                        
+                        if (elapsed >= 1.5) {
+                            window.removeEventListener('deviceorientation', orientationHandler);
+                            pushToLiveAdminLog(task.text, "أتم تثبيت ميزان الذهب الحركي في المركز لـ 1.5 ثانية متواصلة مستخدماً الجيروسكوب", "text", "Gyro Stabilized");
+                            completeActiveTaskLocal();
+                        }
+                    } else {
+                        insideTargetStartTime = null;
+                        label.innerText = "الوضعية: خارج النطاق الأخضر! قم بالموازنة بحرص.";
+                        label.style.color = "var(--button-color)";
+                    }
+                }
+                
+                if (window.DeviceOrientationEvent) {
+                    window.addEventListener('deviceorientation', orientationHandler);
+                } else {
+                    area.innerHTML += `<button class="btn-main" onclick="completeActiveTaskLocal()">حساس الجيروسكوب غير مدعوم بهاتفك - اضغط لتخطي محاكي الأمانة</button>`;
+                }
+            }
+            // 6. مهمة تنظيف الشاشة الملوثة (Screen Wiper) المعتمدة على النقاء (Clean Progress)
+            else if (task.type === "wiper") {
+                area.innerHTML = `
+                    <div class="wiper-scratch-area">
+                        <div class="wiper-clean-overlay" id="wiperPctLabel">مؤشر النقاء: 0%</div>
+                        <canvas class="wiper-scratch-canvas" id="wiperScratchCanvas"></canvas>
+                    </div>
+                `;
+                setTimeout(() => {
+                    let cv = document.getElementById('wiperScratchCanvas');
+                    if(!cv) return;
+                    let ctx = cv.getContext('2d');
+                    cv.width = cv.parentElement.clientWidth;
+                    cv.height = cv.parentElement.clientHeight;
+                    
+                    ctx.fillStyle = "#1e293b"; 
+                    ctx.fillRect(0,0,cv.width,cv.height);
+                    
+                    let totalPixels = cv.width * cv.height;
+                    let scratchedPixelsEstimate = 0;
+                    
+                    function scrubAction(x, y) {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 22, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        scratchedPixelsEstimate += Math.PI * 22 * 22;
+                        let cleanProgress = Math.floor((scratchedPixelsEstimate / (totalPixels * 1.4)) * 100);
+                        if(cleanProgress > 100) cleanProgress = 100;
+                        
+                        document.getElementById('wiperPctLabel').innerText = `مؤشر النقاء الحقيقي: ${cleanProgress}%`;
+                        
+                        if (cleanProgress >= 100) {
+                            cv.ontouchmove = null; cv.onmousemove = null;
+                            pushToLiveAdminLog(task.text, "تم قشط وتلميع طبقة غبار الشاشة الداكنة بالكامل ورفع نسبة النقاء إلى 100%", "text", "Screen Cleaned 100%");
+                            completeActiveTaskLocal();
+                        }
+                    }
+                    
+                    cv.ontouchmove = (e) => {
+                        let t = e.touches[0];
+                        let r = cv.getBoundingClientRect();
+                        scrubAction(t.clientX - r.left, t.clientY - r.top);
+                    };
+                    cv.onmousemove = (e) => {
+                        if(e.buttons === 1) scrubAction(e.offsetX, e.offsetY);
+                    };
+                }, 100);
+            }
+            // 7. مهمة عداد الخطوات الاضطراري (Step Counter) المربوطة بحساس التسارع الفعلي للهاتف
+            else if (task.type === "steps") {
+                let stepCount = 0;
+                let lastX = null, lastY = null, lastZ = null;
+                
+                area.innerHTML = `
+                    <div style="background:#0f172a; padding:20px; border-radius:16px; border:2px solid #3b82f6;">
+                        <h1 id="step-counter-label" style="font-size:4rem; color:#3b82f6; margin:0;">0</h1>
+                        <p style="font-weight:bold; color:#fff;">خطوة مرصودة حقيقية 🏃‍♂️</p>
+                        <p style="font-size:0.9rem; color:#94a3b8;">يرجى السير أو الهرولة الحقيقية في المكان الحركي لتسجيل الـ 100 خطوة كاملة.</p>
+                    </div>
+                `;
+                
+                function motionHandler(event) {
+                    let acc = event.accelerationIncludingGravity;
+                    if(!acc) return;
+                    
+                    if (lastX !== null) {
+                        let deltaX = Math.abs(acc.x - lastX);
+                        let deltaY = Math.abs(acc.y - lastY);
+                        let deltaZ = Math.abs(acc.z - lastZ);
+                        
+                        // تطبيق فحص التسارع الميكانيكي الحقيقي المعتمد على عتبة الحركة الجسدية
+                        if ((deltaX + deltaY + deltaZ) > 13) {
+                            stepCount++;
+                            let lbl = document.getElementById('step-counter-label');
+                            if(lbl) lbl.innerText = stepCount;
+                            
+                            if (stepCount >= 100) {
+                                window.removeEventListener('devicemotion', motionHandler);
+                                pushToLiveAdminLog(task.text, "سجل اللاعب 100 خطوة ميكانيكية حركية فعلية مرصودة بحساس التسارع للهاتف الذكي", "text", "100 Steps Completed");
+                                completeActiveTaskLocal();
+                            }
+                        }
+                    }
+                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
+                }
+                
+                if (window.DeviceMotionEvent) {
+                    window.addEventListener('devicemotion', motionHandler);
+                } else {
+                    area.innerHTML += `<button class="btn-main" onclick="completeActiveTaskLocal()">مستشعر الارتجاج غير مدعوم بالجهاز - اضغط لتخطي محاكي الأمانة</button>`;
+                }
+            }
+            // 8. مهمة تعديل التردد اللاسلكي (Radio Tune) بواسطة السلايدر والموجة الجيبية
+            else if (task.type === "radio") {
+                let targetFreq = Math.floor(40 + Math.random() * 50);
+                area.innerHTML = `
+                    <div class="radio-tune-container">
+                        <div class="radio-wave-box" style="display:flex; align-items:center; justify-content:center;">
+                            <span id="radio-wave-feedback" style="font-size:1.1rem; font-weight:900; color:#ef4444; animation: blink 0.3s infinite alternate;">[تشويش راديوي لاسلكي حاد ⚡]</span>
+                        </div>
+                        <p style="font-weight:bold; margin:5px 0;">التردد الحالي المستهدف: <span id="current-radio-label">10</span> Hz / ${targetFreq} Hz</p>
+                        <input type="range" min="10" max="100" value="10" class="radio-slider-element" id="radioSlider">
+                        <button class="btn-skip" id="btn-lock-radio" disabled style="width:90%">قفل وإرسال التردد الآمن 📟</button>
+                    </div>
+                `;
+                setTimeout(() => {
+                    let slider = document.getElementById('radioSlider');
+                    let feedback = document.getElementById('radio-wave-feedback');
+                    let lbl = document.getElementById('current-radio-label');
+                    let lockBtn = document.getElementById('btn-lock-radio');
+                    
+                    slider.oninput = () => {
+                        let val = parseInt(slider.value);
+                        lbl.innerText = val;
+                        if (Math.abs(val - targetFreq) <= 2) {
+                            feedback.innerText = "[ إشارة نقية وآمنة بنسبة 100% ✅ ]";
+                            feedback.style.color = "#22c55e";
+                            feedback.style.animation = "none";
+                            lockBtn.disabled = false;
+                            lockBtn.className = "btn-crew";
+                        } else {
+                            feedback.innerText = "[تشويش راديوي لاسلكي حاد ⚡]";
+                            feedback.style.color = "#ef4444";
+                            lockBtn.disabled = true;
+                            lockBtn.className = "btn-skip";
+                        }
+                    };
+                    
+                    lockBtn.onclick = () => {
+                        pushToLiveAdminLog(task.text, "تم ضبط الراديو وإلغاء التشويش الراديوي عند التردد المتطابق: " + targetFreq + " Hz", "text", targetFreq + "Hz");
+                        completeActiveTaskLocal();
+                    };
+                }, 100);
+            }
+            // 9. مهمة بطاقة الهوية السريعة (Card Swipe) وحساب الوقت الزمني الفعلي للسحب بالإصبع
+            else if (task.type === "swipe") {
+                area.innerHTML = `
+                    <p style="font-size:0.9rem; color:#94a3b8;">اسحب البطاقة من اليسار لليمين بسرعة مثالية (ليست سريعة جداً وليست بطيئة جداً).</p>
+                    <div class="card-swipe-track" id="swipeTrack">
+                        <div class="card-swipe-block" id="swipeBlock">🪪 CARD</div>
+                    </div>
+                    <p id="swipe-status-feedback" style="font-weight:bold; color:var(--button-color);">الحالة: بانتظار سحب الهوية الممغنطة...</p>
+                `;
+                setTimeout(() => {
+                    let track = document.getElementById('swipeTrack');
+                    let block = document.getElementById('swipeBlock');
+                    let feedback = document.getElementById('swipe-status-feedback');
+                    
+                    let startTime = 0;
+                    let isDragging = false;
+                    
+                    block.ontouchstart = () => {
+                        startTime = Date.now();
+                        isDragging = true;
+                    };
+                    
+                    track.ontouchmove = (e) => {
+                        if(!isDragging) return;
+                        let rect = track.getBoundingClientRect();
+                        let x = e.touches[0].clientX - rect.left - 35;
+                        if(x < 0) x = 0;
+                        let maxX = track.clientWidth - block.clientWidth;
+                        if(x > maxX) x = maxX;
+                        block.style.left = x + "px";
+                        
+                        if (x === maxX) {
+                            isDragging = false;
+                            let duration = Date.now() - startTime;
+                            if (duration < 250) {
+                                feedback.innerText = "فشل! سحب سريع جداً (Too Fast) ❌";
+                                feedback.style.color = "#ef4444";
+                                setTimeout(() => { block.style.left = "0px"; }, 600);
+                            } else if (duration > 950) {
+                                feedback.innerText = "فشل! سحب بطيء جداً (Too Slow) ❌";
+                                feedback.style.color = "#ef4444";
+                                setTimeout(() => { block.style.left = "0px"; }, 600);
+                            } else {
+                                feedback.innerText = "نجاح السحب المعتدل المثالي! تم قبول الهوية الممغنطة بنجاح ✅";
+                                feedback.style.color = "#22c55e";
+                                setTimeout(() => {
+                                    pushToLiveAdminLog(task.text, "أتم سحب بطاقة الهوية الذكية بالسرعة الزمانية المعتدلة المثالية المقدرة برمجياً", "text", duration + "ms");
+                                    completeActiveTaskLocal();
+                                }, 600);
+                            }
+                        }
+                    };
+                }, 100);
+            }
+            // 10. مهمة شحن الوقود (Fuel Refill) مع حد الخطأ المقنن المقدر بـ +-2%
+            else if (task.type === "fuel") {
+                area.innerHTML = `
+                    <div style="background:#111827; padding:15px; border-radius:12px; border:2px solid #374151;">
+                        <p style="font-weight:bold; color:#fff;">الهدف: الخط الأخضر المعتمد عند <b style="color:#22c55e">80%</b> بالضبط</p>
+                        <div class="task-bar-container" style="margin-bottom:15px;"><div id="fuelBarFill" class="task-bar-fill" style="width:0%; background:#eab308;"></div></div>
+                        <h2 id="fuelPercentText" style="margin:0 0 15px 0;">0%</h2>
+                        <button class="download-btn-active" style="background:radial-gradient(circle, #ef4444, #991b1b); border-color:#f87171;" id="btnFuelPump">اضغط مطولاً لضخ الوقود ⛽</button>
+                    </div>
+                `;
+                setTimeout(() => {
+                    let btn = document.getElementById('btnFuelPump');
+                    let bar = document.getElementById('fuelBarFill');
+                    let pctTxt = document.getElementById('fuelPercentText');
+                    
+                    let level = 0;
+                    let pumpInterval = null;
+                    
+                    btn.ontouchstart = (e) => {
+                        e.preventDefault();
+                        pumpInterval = setInterval(() => {
+                            level += 1;
+                            if (level > 100) level = 100;
+                            bar.style.width = level + "%";
+                            pctTxt.innerText = level + "%";
+                        }, 50);
+                    };
+                    
+                    btn.ontouchend = () => {
+                        clearInterval(pumpInterval);
+                        // فحص نسبة تعبئة مستوى السائل الموجه للوقود بسماحية هزلية هادفة
+                        if (Math.abs(level - 80) <= 2) {
+                            pushToLiveAdminLog(task.text, "تم شحن وتعبئة خزان وقود المركبة بدقة متناهية عند المستوى: " + level + "%", "text", level + "% Filled");
+                            completeActiveTaskLocal();
+                        } else {
+                            showCustomModal("فشل في التعبئة ❌", `المستوى الحالي هو ${level}%. المطلوب التوقف عند نطاق الـ 80% بالضبط بسماحية صغيرة جداً! أعد المحاولة من الصفر.`);
+                            level = 0; bar.style.width = "0%"; pctTxt.innerText = "0%";
+                        }
+                    };
+                    btn.onmousedown = btn.ontouchstart;
+                    btn.onmouseup = btn.ontouchend;
+                }, 100);
+            }
+            // 11. مهمة ترتيب عينات المختبر (Anomaly Sorting) بالسحب والإسقاط الحقيقي اللمسي
+            else if (task.type === "sorting") {
+                let colors = ["red", "blue", "green", "yellow", "purple"];
+                let shuffledNodes = [...colors].sort(() => 0.5 - Math.random());
+                
+                area.innerHTML = `
+                    <p style="font-size:0.9rem; color:#94a3b8;">اسحب كل عينة ملونة من الأعلى وضعها في الصندوق المطابق للونها بالأسفل.</p>
+                    <div class="sorting-drag-zone" id="sortingDragZone"></div>
+                    <div class="sorting-drop-zone" id="sortingDropZone"></div>
+                `;
+                
+                setTimeout(() => {
+                    let dragZone = document.getElementById('sortingDragZone');
+                    let dropZone = document.getElementById('sortingDropZone');
+                    let placedCount = 0;
+                    
+                    shuffledNodes.forEach(color => {
+                        let node = document.createElement('div');
+                        node.className = "sorting-node";
+                        node.style.backgroundColor = color;
+                        node.innerText = "🔬";
+                        node.setAttribute('draggable', 'true');
+                        node.id = "node-" + color;
+                        
+                        node.ondragstart = (e) => { e.dataTransfer.setData("text", color); };
+                        
+                        // دعم حركي إضافي مخصص لأحداث اللمس على الجوال
+                        node.ontouchmove = (e) => {
+                            let touch = e.touches[0];
+                            node.style.position = "fixed";
+                            node.style.left = (touch.clientX - 25) + "px";
+                            node.style.top = (touch.clientY - 25) + "px";
+                            node.style.zIndex = 9999;
+                        };
+                        
+                        node.ontouchend = (e) => {
+                            let touch = e.changedTouches[0];
+                            node.style.position = "static";
+                            node.style.zIndex = "auto";
+                            let elements = document.getElementsByClassName('sorting-slot');
+                            for(let slot of elements) {
+                                let rect = slot.getBoundingClientRect();
+                                if(touch.clientX > rect.left && touch.clientX < rect.right && touch.clientY > rect.top && touch.clientY < rect.bottom) {
+                                    if(slot.getAttribute('data-color') === color && !slot.innerHTML.includes("🔬")) {
+                                        slot.appendChild(node);
+                                        node.setAttribute('draggable', 'false');
+                                        placedCount++;
+                                        if(placedCount === 5) {
+                                            pushToLiveAdminLog(task.text, "تم فرز وترتيب كامل عينات المختبر الـ 5 الملونة داخل فتحاتها الهندسية المخصصة بنجاح", "text", "Sorting Success");
+                                            completeActiveTaskLocal();
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        
+                        dragZone.appendChild(node);
+                    });
+                    
+                    colors.forEach(color => {
+                        let slot = document.createElement('div');
+                        slot.className = "sorting-slot";
+                        slot.style.borderColor = color;
+                        slot.setAttribute('data-color', color);
+                        
+                        slot.ondragover = (e) => e.preventDefault();
+                        slot.ondrop = (e) => {
+                            e.preventDefault();
+                            let draggedColor = e.dataTransfer.getData("text");
+                            if (draggedColor === color) {
+                                let draggedNode = document.getElementById("node-" + draggedColor);
+                                slot.appendChild(draggedNode);
+                                placedCount++;
+                                if (placedCount === 5) {
+                                    pushToLiveAdminLog(task.text, "تم فرز وترتيب كامل عينات المختبر الـ 5 الملونة داخل فتحاتها الهندسية المخصصة بنجاح", "text", "Sorting Success");
+                                    completeActiveTaskLocal();
+                                }
+                            }
+                        };
+                        dropZone.appendChild(slot);
+                    });
+                }, 100);
+            }
+            // 12. مهمة نمط القفل الإلكتروني (Pattern Lock) بحركة سحب واحدة متصلة
+            else if (task.type === "pattern") {
+                area.innerHTML = `
+                    <p style="font-weight:bold; color:var(--button-color);">النمط المطلوب: قم بتوصيل النقاط الثلاث بالصف العلوي (1 ← 2 ← 3) بحركة سحب متصلة!</p>
+                    <div class="pattern-lock-board" id="patternBoard">
+                        <div class="pattern-lock-dot" data-index="1"></div>
+                        <div class="pattern-lock-dot" data-index="2"></div>
+                        <div class="pattern-lock-dot" data-index="3"></div>
+                        <div class="pattern-lock-dot" data-index="4"></div>
+                        <div class="pattern-lock-dot" data-index="5"></div>
+                        <div class="pattern-lock-dot" data-index="6"></div>
+                        <div class="pattern-lock-dot" data-index="7"></div>
+                        <div class="pattern-lock-dot" data-index="8"></div>
+                        <div class="pattern-lock-dot" data-index="9"></div>
+                    </div>
+                `;
+                setTimeout(() => {
+                    let board = document.getElementById('patternBoard');
+                    let connectedIndices = [];
+                    let isDrawingPattern = false;
+                    
+                    function checkDotCollision(clientX, clientY) {
+                        let dots = document.querySelectorAll('.pattern-lock-dot');
+                        dots.forEach(dot => {
+                            let rect = dot.getBoundingClientRect();
+                            if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
+                                let idx = parseInt(dot.getAttribute('data-index'));
+                                if (!connectedIndices.includes(idx)) {
+                                    connectedIndices.push(idx);
+                                    dot.classList.add('active');
+                                }
+                            }
+                        });
+                    }
+                    
+                    board.ontouchstart = (e) => {
+                        isDrawingPattern = true;
+                        connectedIndices = [];
+                        document.querySelectorAll('.pattern-lock-dot').forEach(d => d.classList.remove('active'));
+                        checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+                    };
+                    
+                    board.ontouchmove = (e) => {
+                        if(!isDrawingPattern) return;
+                        checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+                    };
+                    
+                    board.ontouchend = () => {
+                        isDrawingPattern = false;
+                        // التحقق من مطابقة النمط المطلوب الصارم هندسياً وهو توصيل النقاط 1 ثم 2 ثم 3 بالترتيب
+                        if (connectedIndices.length === 3 && connectedIndices[0] === 1 && connectedIndices[1] === 2 && connectedIndices[2] === 3) {
+                            pushToLiveAdminLog(task.text, "تم رسم النمط الهندسي الصحيح وفك القفل الإلكتروني بأمان", "text", "Pattern Connected");
+                            completeActiveTaskLocal();
+                        } else {
+                            showCustomModal("نمط خاطئ ❌", "النمط المدخل غير مطابق للشكل التوضيحي المطلوب! حاول السحب المتصل للنقاط الثلاثة العلوية بالترتيب.");
+                            document.querySelectorAll('.pattern-lock-dot').forEach(d => d.classList.remove('active'));
+                        }
+                    };
+                }, 100);
+            }
+            // 13. مهمة توجيه الهوائي اللاسلكي (Satellite Align) تدوير دائري حركي دقيق لـ 100%
+            else if (task.type === "satellite") {
+                area.innerHTML = `
+                    <p style="font-size:0.9rem; color:#94a3b8;">قم بتدوير طبق الاستقبال الفضائي دائرياً ببطء لتوجيهه نحو زاوية قوة الإشارة الكاملة (نطاق الـ 180 درجة)!</p>
+                    <div class="satellite-dish-frame" id="satDish">
+                        <div class="satellite-dish-pointer" id="satPointer"></div>
+                    </div>
+                    <h3 id="satSignalLabel" style="color:#ef4444;">قوة الإشارة الحالية: 0% 📡</h3>
+                `;
+                setTimeout(() => {
+                    let dish = document.getElementById('satDish');
+                    let pointer = document.getElementById('satPointer');
+                    let label = document.getElementById('satSignalLabel');
+                    
+                    let insideTargetDuration = 0;
+                    let checkInterval = null;
+                    let currentAngleCalculated = 0;
+                    
+                    dish.ontouchmove = (e) => {
+                        let rect = dish.getBoundingClientRect();
+                        let centerX = rect.left + rect.width / 2;
+                        let centerY = rect.top + rect.height / 2;
+                        let touch = e.touches[0];
+                        
+                        let angle = Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI) + 90;
+                        currentAngleCalculated = Math.floor(angle < 0 ? angle + 360 : angle);
+                        pointer.style.transform = `rotate(${currentAngleCalculated}deg)`;
+                        
+                        // جعل زاوية التطابق الكامل هي 180 درجة بدقة
+                        let delta = Math.abs(currentAngleCalculated - 180);
+                        let signalPower = 100 - (delta * 1.5);
+                        if (signalPower < 0) signalPower = 0;
+                        signalPower = Math.floor(signalPower);
+                        
+                        label.innerText = `قوة البث والإشارة الحالية: ${signalPower}% 📡`;
+                        
+                        if (signalPower >= 98) {
+                            label.style.color = "#4ade80";
+                            if (!checkInterval) {
+                                checkInterval = setInterval(() => {
+                                    insideTargetDuration += 0.5;
+                                    if(insideTargetDuration >= 2) {
+                                        clearInterval(checkInterval);
+                                        pushToLiveAdminLog(task.text, "تم توجيه طبق الهوائي وتثبيت قوة إشارة الاستقبال الفضائي بنسبة 100% لثانيتين متواصلتين", "text", "Satellite Aligned");
+                                        completeActiveTaskLocal();
+                                    }
+                                }, 500);
+                            }
+                        } else {
+                            label.style.color = "#ef4444";
+                            clearInterval(checkInterval);
+                            checkInterval = null;
+                            insideTargetDuration = 0;
+                        }
+                    };
+                }, 100);
+            }
+            // 14. مهمة تتابع الأنوار الأمنية (Simon Says) بـ 3 مراحل متتالية وتصفير المحاولة عند الخطأ
+            else if (task.type === "simon") {
+                let simonColors = ["#ef4444", "#3b82f6", "#eab308", "#22c55e"]; // أحمر، أزرق، أصفر، أخضر
+                let simonSequence = [];
+                let playerSequence = [];
+                let currentSimonStage = 1;
+                
+                area.innerHTML = `
+                    <p id="simon-status-msg" style="font-weight:bold; color:var(--button-color);">راقب وميض الإضاءة الأمنية لتكراره...</p>
+                    <div class="simon-board">
+                        <div class="simon-quadrant" id="simon-0" style="background:#ef4444;"></div>
+                        <div class="simon-quadrant" id="simon-1" style="background:#3b82f6;"></div>
+                        <div class="simon-quadrant" id="simon-2" style="background:#eab308;"></div>
+                        <div class="simon-quadrant" id="simon-3" style="background:#22c55e;"></div>
+                    </div>
+                `;
+                
+                function playSequenceAnimation() {
+                    playerSequence = [];
+                    let msg = document.getElementById('simon-status-msg');
+                    if(msg) msg.innerText = `جاري عرض التتابع للمرحلة: ${currentSimonStage} / 3 ⚡`;
+                    
+                    disableSimonBoardClicks(true);
+                    let i = 0;
+                    let iv = setInterval(() => {
+                        if (i >= simonSequence.length) {
+                            clearInterval(iv);
+                            disableSimonBoardClicks(false);
+                            if(msg) msg.innerText = "أعد نقر الأزرار الملونة الآن بنفس الترتيب التتابعي!";
+                            return;
+                        }
+                        let quadIdx = simonSequence[i];
+                        let el = document.getElementById("simon-" + quadIdx);
+                        if(el) {
+                            el.style.opacity = "1";
+                            setTimeout(() => { el.style.opacity = "0.4"; }, 400);
+                        }
+                        i++;
+                    }, 700);
+                }
+                
+                function disableSimonBoardClicks(disabled) {
+                    for(let k=0; k<4; k++) {
+                        let el = document.getElementById("simon-" + k);
+                        if(el) el.style.pointerEvents = disabled ? "none" : "auto";
+                    }
+                }
+                
+                function handleQuadrantClick(idx) {
+                    let el = document.getElementById("simon-" + idx);
+                    if(el) {
+                        el.style.opacity = "1";
+                        setTimeout(() => { el.style.opacity = "0.4"; }, 200);
+                    }
+                    playerSequence.push(idx);
+                    
+                    // فحص مطابقة خطوة التتابع الحالية مباشرة
+                    let currentStepIdx = playerSequence.length - 1;
+                    if (playerSequence[currentStepIdx] !== simonSequence[currentStepIdx]) {
+                        showCustomModal("نقرة خاطئة ❌", "لم تطابق التتابع الأمني المضيء! تم تصفير المحاولة للمرحلة الأولى لإعادة الفحص.");
+                        currentSimonStage = 1;
+                        simonSequence = [Math.floor(Math.random() * 4)];
+                        playSequenceAnimation();
+                        return;
+                    }
+                    
+                    if (playerSequence.length === simonSequence.length) {
+                        if (currentSimonStage < 3) {
+                            currentSimonStage++;
+                            simonSequence.push(Math.floor(Math.random() * 4));
+                            setTimeout(() => { playSequenceAnimation(); }, 800);
+                        } else {
+                            pushToLiveAdminLog(task.text, "أتم بنجاح مطابقة تتابع الأنوار الأمنية لـ 3 مراحل كاملة دون أي خطأ نقر", "text", "Simon Says 3/3 Win");
+                            completeActiveTaskLocal();
+                        }
+                    }
+                }
+                
+                setTimeout(() => {
+                    for(let k=0; k<4; k++) {
+                        let el = document.getElementById("simon-" + k);
+                        if(el) el.onclick = () => handleQuadrantClick(k);
+                    }
+                    simonSequence = [Math.floor(Math.random() * 4)];
+                    playSequenceAnimation();
+                }, 100);
+            }
+            // 15. مهمة فرز الفيروسات الرقمية (Virus Quarantine) بتفجير 15 كرة حمراء وتفادي الخضراء
+            else if (task.type === "virus") {
+                let killedVirusCount = 0;
+                let virusSpawnInterval = null;
+                
+                area.innerHTML = `
+                    <p style="font-weight:bold; color:var(--imposter-color);">الهدف: فجر 15 فيروساً باللون الأحمر 🔴 وتجنب البيانات الخضراء 🟢!</p>
+                    <h3 id="virus-killed-score" style="color:var(--button-color); margin:0 0 5px 0;">العدد الحالي المدمر: 0 / 15</h3>
+                    <div class="virus-quarantine-field" id="virusField"></div>
+                `;
+                
+                function spawnVirusBubble() {
+                    let field = document.getElementById('virusField');
+                    if(!field) return;
+                    
+                    let bubble = document.createElement('div');
+                    bubble.className = "virus-bubble";
+                    let isTargetRed = Math.random() > 0.35; // نسبة أعلى للكرات الخبيثة الحمراء
+                    
+                    bubble.style.backgroundColor = isTargetRed ? "#ef4444" : "#22c55e";
+                    bubble.style.boxShadow = isTargetRed ? "0 0 8px #ef4444" : "0 0 8px #22c55e";
+                    
+                    let maxLeft = field.clientWidth - 32;
+                    bubble.style.left = Math.floor(Math.random() * maxLeft) + "px";
+                    
+                    bubble.onclick = (e) => {
+                        e.stopPropagation();
+                        bubble.remove();
+                        if (isTargetRed) {
+                            killedVirusCount++;
+                            let scoreEl = document.getElementById('virus-killed-score');
+                            if(scoreEl) scoreEl.innerText = `العدد الحالي المدمر: ${killedVirusCount} / 15`;
+                            
+                            if (killedVirusCount >= 15) {
+                                clearInterval(virusSpawnInterval);
+                                pushToLiveAdminLog(task.text, "تم عزل وتدمير 15 فيروساً برمجياً خبيثاً بنجاح وحماية المنشأة الرقمية", "text", "15 Viruses Destroyed");
+                                completeActiveTaskLocal();
+                            }
+                        } else {
+                            clearInterval(virusSpawnInterval);
+                            showCustomModal("اختبار فاشل ❌", "لقد قمت بالنقر وتدمير كرة بيانات سليمة خضراء بالخطأ! يعاد التحدي من جديد.");
+                            killedVirusCount = 0;
+                            let scoreEl = document.getElementById('virus-killed-score');
+                            if(scoreEl) scoreEl.innerText = "العدد الحالي المدمر: 0 / 15";
+                            document.getElementById('virusField').innerHTML = "";
+                            virusSpawnInterval = setInterval(spawnVirusBubble, 800);
+                        }
+                    };
+                    
+                    field.appendChild(bubble);
+                    setTimeout(() => { if(bubble.parentElement) bubble.remove(); }, 2500);
+                }
+                
+                setTimeout(() => {
+                    virusSpawnInterval = setInterval(spawnVirusBubble, 800);
+                }, 100);
+            }
+            // 16. مهمة إعادة تدوير النفايات الميدانية والتقاط صورة حية للسلة
+            else if (task.type === "recycling") {
+                area.innerHTML = `
+                    <p style="font-weight:bold;">الخطوات الميدانية:</p>
+                    <p style="text-align:right; font-size:1rem;">1. اجمع 3 مهملات فارغة من الأرض واقعياً بالمنطقة.<br>2. ارمها في سلة النفايات الحقيقية المتواجدة بالموقع.<br>3. افتح الكاميرا بالأسفل والتقط صورة حية ومباشرة تؤكد ذلك لتوثيق السجل الميداني للمشرف.</p>
+                    <div class="camera-capture-box">
+                        <button class="btn-main" onclick="document.getElementById('recycling-camera-file').click()">فتح الكاميرا والتقاط الدليل 📸</button>
+                        <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="recycling-camera-file">
+                        <br><img id="recycling-preview" class="camera-preview-img">
+                    </div>
+                    <button class="btn-crew" id="btn-submit-recycling" disabled style="width:90%">إرسال الدليل وإغلاق المهمة 📤</button>
+                `;
+                setTimeout(() => {
+                    let fileInput = document.getElementById('recycling-camera-file');
+                    let preview = document.getElementById('recycling-preview');
+                    let submitBtn = document.getElementById('btn-submit-recycling');
+                    let compressedBase64 = "";
+                    
+                    fileInput.onchange = (e) => {
+                        let file = e.target.files[0];
+                        if(!file) return;
+                        let reader = new FileReader();
+                        reader.onload = (event) => {
+                            preview.src = event.target.result;
+                            preview.style.display = "inline-block";
+                            compressedBase64 = event.target.result; // لحاوية الكائن المباشر الموثق
+                            submitBtn.disabled = false;
+                            submitBtn.className = "btn-crew";
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                    
+                    submitBtn.onclick = () => {
+                        pushToLiveAdminLog(task.text, "جمع 3 مهملات حقيقية من الأرض والتقاط صورة حية لسلة تدوير النفايات", "image", compressedBase64);
+                        completeActiveTaskLocal();
+                    };
+                }, 100);
+            }
+            // 17. مهمة البصمات الجنائية بلون عشوائي يتغير عند كل فتح والتقاط 3 صور حية داخل ألبوم مصغر مخصص
+            else if (task.type === "fingerprints") {
+                let colorOptions = ["أحمر", "أزرق", "أصفر", "أخضر"];
+                let selectedRandomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+                
+                area.innerHTML = `
+                    <p style="font-weight:bold; color:var(--button-color)">اللون الجنائي المطلوب فجأة: ابحث عن 3 أغراض مختلفة لونها [${selectedRandomColor}] بالموقع!</p>
+                    <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:10px;">التقط صورة حية مختلفة لكل غرض لتعبئة الخانات الثلاث المخصصة للألبوم للأدلة:</p>
+                    
+                    <div style="display:flex; justify-content:space-between; gap:5px; margin-bottom:15px;">
+                        <div class="camera-capture-box" style="flex:1; padding:5px; font-size:0.85rem;">
+                            <button onclick="document.getElementById('fp-file-1').click()">صورة 1 📸</button>
+                            <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="fp-file-1">
+                            <img id="fp-prev-1" class="camera-preview-img" style="max-width:60px;">
+                        </div>
+                        <div class="camera-capture-box" style="flex:1; padding:5px; font-size:0.85rem;">
+                            <button onclick="document.getElementById('fp-file-2').click()">صورة 2 📸</button>
+                            <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="fp-file-2">
+                            <img id="fp-prev-2" class="camera-preview-img" style="max-width:60px;">
+                        </div>
+                        <div class="camera-capture-box" style="flex:1; padding:5px; font-size:0.85rem;">
+                            <button onclick="document.getElementById('fp-file-3').click()">صورة 3 📸</button>
+                            <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="fp-file-3">
+                            <img id="fp-prev-3" class="camera-preview-img" style="max-width:60px;">
+                        </div>
+                    </div>
+                    <button class="btn-crew" id="btn-submit-fingerprints" disabled style="width:90%">إرسال ألبوم البصمات المصدق 📤</button>
+                `;
+                setTimeout(() => {
+                    let f1 = document.getElementById('fp-file-1'), f2 = document.getElementById('fp-file-2'), f3 = document.getElementById('fp-file-3');
+                    let p1 = document.getElementById('fp-prev-1'), p2 = document.getElementById('fp-prev-2'), p3 = document.getElementById('fp-prev-3');
+                    let submitBtn = document.getElementById('btn-submit-fingerprints');
+                    
+                    let b1 = "", b2 = "", b3 = "";
+                    
+                    f1.onchange = (e) => {
+                        if(!e.target.files[0]) return;
+                        let rd = new FileReader();
+                        rd.onload = (ev) => { p1.src = ev.target.result; p1.style.display="block"; b1 = ev.target.result; checkAllPhotosUploaded(); };
+                        rd.readAsDataURL(e.target.files[0]);
+                    };
+                    f2.onchange = (e) => {
+                        if(!e.target.files[0]) return;
+                        let rd = new FileReader();
+                        rd.onload = (ev) => { p2.src = ev.target.result; p2.style.display="block"; b2 = ev.target.result; checkAllPhotosUploaded(); };
+                        rd.readAsDataURL(e.target.files[0]);
+                    };
+                    f3.onchange = (e) => {
+                        if(!e.target.files[0]) return;
+                        let rd = new FileReader();
+                        rd.onload = (ev) => { p3.src = ev.target.result; p3.style.display="block"; b3 = ev.target.result; checkAllPhotosUploaded(); };
+                        rd.readAsDataURL(e.target.files[0]);
+                    };
+                    
+                    function checkAllPhotosUploaded() {
+                        if(b1 !== "" && b2 !== "" && b3 !== "") {
+                            submitBtn.disabled = false;
+                            submitBtn.className = "btn-crew";
+                        }
+                    }
+                    
+                    submitBtn.onclick = () => {
+                        pushToLiveAdminLog(task.text, `جمع وتوثيق ألبوم مصغر من 3 خانات صور مختلفة تطابق اللون العشوائي المطلوب: ${selectedRandomColor}`, "image", b1);
+                        completeActiveTaskLocal();
+                    };
+                }, 100);
+            }
+            // 19. مهمة عينة أوراق الشجر البيئية الحصرية للغابة والتقاط ورقة جافة تماماً وأخرى خضراء يانعة بجانب بعضهما بكف اليد
+            else if (task.type === "leaf") {
+                area.innerHTML = `
+                    <p style="font-weight:bold; color:#4ade80;">مهمة حصرية في أرجاء الغابة الطبيعية 🌲:</p>
+                    <p style="text-align:right; font-size:1rem;">1. ابحث في محيطك ميدانياً عن ورقة شجر جافة تماماً (بنية).<br>2. ابحث عن ورقة شجر خضراء يانعة طازجة.<br>3. ضعهما معاً جنباً إلى جنب بشكل واضح ومباشر في باطن كف يدك الفعلي.<br>4. التقط صورة حية واحدة تجمع الدليلين لإرسالها فوراً في سجل السحابة للمشرف.</p>
+                    <div class="camera-capture-box">
+                        <button class="btn-main" onclick="document.getElementById('leaf-camera-file').click()">التقاط صورة العينة البيئية 📸</button>
+                        <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="leaf-camera-file">
+                        <br><img id="leaf-preview" class="camera-preview-img">
+                    </div>
+                    <button class="btn-crew" id="btn-submit-leaf" disabled style="width:90%">إرسال العينة لسجل السحابة 📤</button>
+                `;
+                setTimeout(() => {
+                    let fileInput = document.getElementById('leaf-camera-file');
+                    let preview = document.getElementById('leaf-preview');
+                    let submitBtn = document.getElementById('btn-submit-leaf');
+                    let compressedBase64 = "";
+                    
+                    fileInput.onchange = (e) => {
+                        let file = e.target.files[0];
+                        if(!file) return;
+                        let reader = new FileReader();
+                        reader.onload = (event) => {
+                            preview.src = event.target.result;
+                            preview.style.display = "inline-block";
+                            compressedBase64 = event.target.result;
+                            submitBtn.disabled = false;
+                            submitBtn.className = "btn-crew";
+                        };
+                        reader.readAsDataURL(file);
+                    };
+                    
+                    submitBtn.onclick = () => {
+                        pushToLiveAdminLog(task.text, "التقاط صورة حية ومفردة تجمع عينة ورقة شجر جافة تماماً وأخرى خضراء يانعة جنباً إلى جنب في كف اليد", "image", compressedBase64);
+                        completeActiveTaskLocal();
+                    };
+                }, 100);
+            }
+            // 20. مهمة تحديد الشمال الجغرافي والقبلة بالبوصلة المغناطيسية ونطاق المسامحة الحسابي +-5
+            else if (task.type === "compass") {
+                area.innerHTML = `
+                    <p style="font-size:0.95rem; color:#94a3b8; margin-bottom:10px;">در بجسدك كاملاً وبشكل دائري مستعيناً بمستشعر البوصلة المغناطيسي للهاتف حتى تتوجه نحو زاوية الشمال الدقيق (الزاوية 0°).</p>
+                    <div style="width:130px; height:130px; border-radius:50%; border:5px dashed #facc15; margin:15px auto; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); transition: transform 0.1s;" id="compassRing">
+                        <span style="font-size:2rem; font-weight:900; color:#fff;" id="compassHeadingText">0°</span>
+                    </div>
+                    <h3 id="compassStatusFeedback" style="color:var(--button-color);">الوضعية: جاري معايرة الحساس المغناطيسي الفعلي...</h3>
+                `;
+                
+                let lockHeadingDuration = 0;
+                let lockInterval = null;
+                
+                function compassListener(event) {
+                    let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+                    if (heading === undefined || heading === null) return;
+                    
+                    let roundedHeading = Math.floor(heading);
+                    let ring = document.getElementById('compassRing');
+                    let txt = document.getElementById('compassHeadingText');
+                    let feedback = document.getElementById('compassStatusFeedback');
+                    
+                    if(ring) ring.style.transform = `rotate(${-roundedHeading}deg)`;
+                    if(txt) txt.innerText = roundedHeading + "°";
+                    
+                    // التحقق الحسابي الصارم من النطاق المقبول المقنن تماشياً مع تشويش الهواتف (355 <= Heading <= 5)
+                    if (roundedHeading >= 355 || roundedHeading <= 5) {
+                        if(feedback) {
+                            feedback.innerText = "رصد ممتاز! ثبت بجسدك الآن في هذا النطاق المستهدف...";
+                            feedback.style.color = "#22c55e";
+                        }
+                        
+                        if (!lockInterval) {
+                            lockInterval = setInterval(() => {
+                                lockHeadingDuration += 0.5;
+                                if (lockHeadingDuration >= 2) {
+                                    clearInterval(lockInterval);
+                                    window.removeEventListener('deviceorientation', compassListener, true);
+                                    pushToLiveAdminLog(task.text, "تم تحديد اتجاه الشمال الجغرافي الدقيق بنجاح بالتثبيت المتواصل لثانيتين بنطاق المسامحة الحسابي المقدر بـ 5 درجات", "text", "Compass Locked at: " + roundedHeading + "°");
+                                    completeActiveTaskLocal();
+                                }
+                            }, 500);
+                        }
+                    } else {
+                        if(feedback) {
+                            feedback.innerText = "الوضعية الحالية: خارج النطاق؛ استمر بالدوران الهادئ حول نفسك.";
+                            feedback.style.color = "var(--button-color)";
+                        }
+                        clearInterval(lockInterval);
+                        lockInterval = null;
+                        lockHeadingDuration = 0;
+                    }
+                }
+                
+                if (window.DeviceOrientationEvent) {
+                    window.addEventListener('deviceorientation', compassListener, true);
+                } else {
+                    area.innerHTML += `<button class="btn-main" onclick="completeActiveTaskLocal()">مستشعر البوصلة المغناطيسي غير مدعوم بجهازك - اضغط لتخطي محاكي الأمانة</button>`;
+                }
+            }
+            
+            document.getElementById('task-modal').style.display = "flex";
+        }
+
+        function closeTaskModal(wasInterrupted) {
+            document.getElementById('task-modal').style.display = "none";
+            // تنظيف وإلغاء كافة المستمعات والحساسات البرمجية عند الإغلاق المفاجئ لمنع تداخل الأحداث
+            window.removeEventListener('deviceorientation', null);
+            window.removeEventListener('devicemotion', null);
+            if(wasInterrupted && currentActiveTaskId !== null) {
+                let task = myTasks[currentActiveTaskId];
+                db.ref('parties/' + partyCode + '/adminLogs/' + myName + '_' + task.id).remove();
+            }
+            currentActiveTaskId = null;
+        }
+
+        function completeActiveTaskLocal() {
+            if (currentActiveTaskId === null) return;
+            let task = myTasks[currentActiveTaskId];
+            task.done = true;
+            closeTaskModal(false);
+            renderMyTasksList();
+            
+            db.ref('parties/' + partyCode + '/players/' + myName + '/doneTasksCount').set(
+                myTasks.filter(t => t.done).length
+            );
+            
+            calculateGlobalProgress();
+        }
+
+        // بناء البنية الهيكلية الصارمة والمطلوبة لكائن بيانات الـ Live Admin Log السحابي المباشر
+        function pushToLiveAdminLog(taskName, detailsString, payloadType, purePayload) {
+            let uniqueId = Date.now().toString();
+            let dateObj = new Date();
+            let formatTime = dateObj.toTimeString().split(' ')[0]; // صيغة المتصفح المحلي الرسمية (HH:MM:SS)
+            
+            let logObject = {
+                "id": uniqueId,
+                "timestamp": formatTime,
+                "player": myName,
+                "task": taskName,
+                "details": detailsString,
+                "type": payloadType,
+                "payload": purePayload
+            };
+            
+            db.ref('parties/' + partyCode + '/adminLogs/' + myName + '_' + uniqueId).set(logObject);
+        }
+
+        function calculateGlobalProgress() {
+            db.ref('parties/' + partyCode + '/players').once('value', snap => {
+                let data = snap.val();
+                let totalCrewTasks = 0;
+                let doneCrewTasks = 0;
+                
+                for (let p in data) {
+                    if (data[p].role === "Crewmate") {
+                        totalCrewTasks += 10; // 10 مهام مخصصة صارمة لكل مواطن
+                        doneCrewTasks += (data[p].doneTasksCount || 0);
+                    }
+                }
+                
+                let percent = totalCrewTasks > 0 ? Math.floor((doneCrewTasks / totalCrewTasks) * 100) : 100;
+                db.ref('parties/' + partyCode + '/taskProgress').set(percent);
+            });
+        }
+
+        function startKillCooldownTimer(seconds) {
+            isKillReady = false;
+            let current = seconds;
+            const btn = document.getElementById('btn-kill-action');
+            const timerLabel = document.getElementById('kill-timer');
+            btn.disabled = true;
+            
+            clearInterval(killTimerInterval);
+            killTimerInterval = setInterval(() => {
+                current--;
+                timerLabel.innerText = current + " ثانية";
+                if (current <= 0) {
+                    clearInterval(killTimerInterval);
+                    timerLabel.innerText = "جاهز للاستخدام! ⚔️";
+                    isKillReady = true;
+                    btn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function signalSabotage() {
+            let targetTime = Date.now() + 60000;
+            db.ref('parties/' + partyCode).update({ sabotage: true, sabotageTargetTime: targetTime });
+        }
+
+        function showSabotageUI(targetTimestamp) {
+            document.getElementById('sabotage-alert').style.display = "flex";
+            sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
+            
+            clearInterval(sabotageCountdownInterval);
+            sabotageCountdownInterval = setInterval(() => {
+                let remaining = Math.ceil((targetTimestamp - Date.now()) / 1000);
+                if (remaining < 0) remaining = 0;
+                document.getElementById('sabotage-countdown').innerText = remaining;
+                
+                if (remaining <= 0) {
+                    clearInterval(sabotageCountdownInterval);
+                    if (isLeader) {
+                        db.ref('parties/' + partyCode + '/status').set("ended");
+                        db.ref('parties/' + partyCode + '/meetingFinalResultText').set("انتهى الوقت المحدود! انفجرت منشأة الطاقة وعطل التخريب طاقم المركبة بالكامل؛ انتصر الخونة فوزاً ساحقاً! 💀");
+                    }
+                }
+            }, 1000);
+        }
+
+        function openScanner(mode) {
+            currentScanMode = mode;
+            currentScreenBeforeScanner = document.getElementById('screen-meeting').classList.contains('active') ? 'screen-meeting' : 'screen-gameplay';
+            
+            changeScreen('screen-scanner');
+            
+            if (mode === 'kill') document.getElementById('scanner-instruction').innerText = "وجه الكاميرا فوراً نحو كود الـ QR الخاص باللاعب لتصفية هدفه صامتاً! 🔪";
+            else if (mode === 'sabotage') document.getElementById('scanner-instruction').innerText = "امسح كود QR غرفة الطوارئ الحقيقي لإيقاف التخريب العاجل! 🛠️";
+            else document.getElementById('scanner-instruction').innerText = "امسح رمز جثة أو كود الطوارئ المعتمد لطلب اجتماع طارئ فوراً 🚨";
+            
+            if(html5QrcodeScanner === null) {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+            }
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => console.log(err));
+        }
+
+        function closeScannerAndReturn() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    changeScreen(currentScreenBeforeScanner);
+                }).catch(err => console.log(err));
+            } else {
+                changeScreen(currentScreenBeforeScanner);
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            let scannedValue = decodedText.trim();
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    processScanAction(scannedValue);
+                }).catch(err => console.log(err));
+            } else { processScanAction(scannedValue); }
+        }
+
+        function onScanFailure(error) { }
+
+        function processScanAction(value) {
+            if (currentScanMode === 'kill') {
+                if (value === myName) {
+                    showCustomModal("خطأ انتحار", "لا يمكنك مسح كود التصفية الخاص بنفسك برمجياً!");
+                    goToGameplay(); return;
+                }
+                db.ref('parties/' + partyCode + '/players/' + value).once('value', snap => {
+                    if (snap.exists() && snap.val().isAlive) {
+                        db.ref('parties/' + partyCode + '/players/' + value + '/isAlive').set(false);
+                        startKillCooldownTimer(killCooldown);
+                        showCustomModal("اغتيال ناجح 🩸", "تمت تصفية وتصفيد اللاعب المغدور " + value + " بنجاح وصمت تام!");
+                        goToGameplay();
+                    } else {
+                        showCustomModal("فشل القتل", "اللاعب ميت بالفعل أو كود التعريف غير صحيح!");
+                        goToGameplay();
+                    }
+                });
+            } 
+            else if (currentScanMode === 'sabotage') {
+                if (value.toLowerCase() === 'fix' || value.toLowerCase() === 'sabotage' || value === '1234') {
+                    db.ref('parties/' + partyCode).update({ sabotage: false });
+                    showCustomModal("تم إلغاء التخريب 🛠️", "أحسنت صنعاً! قمت بمسح كود الطوارئ بنجاح وأنقذت المركبة وألغيت العطل الطارئ.");
+                    goToGameplay();
+                } else {
+                    showCustomModal("رمز خاطئ ❌", "هذا الكود غير معتمد لإصلاح المنشأة وإيقاف العد الطارئ!");
+                    goToGameplay();
+                }
+            }
+            else if (currentScanMode === 'report') {
+                db.ref('parties/' + partyCode + '/meeting').set(true);
+            }
+        }
+
+        function startEmergencyCooldown() {
+            isEmergencyReady = false;
+            let cd = 20;
+            const btn = document.getElementById('btn-emergency-report');
+            btn.disabled = true;
+            btn.innerText = `🚨 الطوارئ في شحن (${cd})`;
+            
+            clearInterval(emergencyCooldownInterval);
+            emergencyCooldownInterval = setInterval(() => {
+                cd--;
+                btn.innerText = `🚨 الطوارئ في شحن (${cd})`;
+                if(cd <= 0) {
+                    clearInterval(emergencyCooldownInterval);
+                    isEmergencyReady = true;
+                    btn.disabled = false;
+                    btn.innerText = `🚨 إبلاغ عن جثة / اجتماع طارئ`;
+                }
+            }, 1000);
+        }
+
+        function triggerLocalMeetingUI() {
+            localHasVoted = false;
+            document.getElementById('btn-skip-vote-action').disabled = false;
+            document.getElementById('voting-status-msg').innerText = "صوتوا الآن بالضغط على الهدف أو اختر الامتناع البشري:";
+            changeScreen('screen-meeting');
+            
+            db.ref('parties/' + partyCode + '/players').once('value', snapshot => {
+                const data = snapshot.val();
+                const grid = document.getElementById('vote-players-grid');
+                grid.innerHTML = "";
+                
+                for (let p in data) {
+                    let card = document.createElement('div');
+                    card.className = "vote-card" + (data[p].isAlive ? "" : " dead");
+                    card.innerHTML = `${data[p].name} <div id="voters-for-${data[p].name}" class="voters-names-list" style="display:none;"></div>`;
+                    
+                    if (data[p].isAlive && !isDead) {
+                        card.onclick = () => registerLocalVote(data[p].name);
+                    }
+                    grid.appendChild(card);
+                }
+                
+                document.getElementById('skip-voters-list').style.display = "none";
+                document.getElementById('skip-voters-list').innerText = "";
+                
+                if (isLeader) {
+                    db.ref('parties/' + partyCode + '/voteDuration').once('value', vdSnap => {
+                        startLeaderMeetingLogic(vdSnap.val() || 45);
+                    });
+                }
+            });
+        }
+
+        function registerLocalVote(targetName) {
+            if (localHasVoted) return;
+            localHasVoted = true;
+            document.getElementById('voting-status-msg').innerText = "تم تسجيل صوتك بنجاح في السحابة! بانتظار البقية..";
+            disableAllVotingCards();
+            document.getElementById('btn-skip-vote-action').disabled = true;
+            
+            db.ref('parties/' + partyCode + '/players/' + myName + '/currentVote').set(targetName);
+        }
+
+        function disableAllVotingCards() {
+            document.querySelectorAll('.vote-card').forEach(c => c.classList.add('disabled'));
+        }
+
+        function startLeaderMeetingLogic(duration) {
+            db.ref('parties/' + partyCode).update({ meetingStatus: "voting", meetingTimer: duration });
+            
+            let current = duration;
+            let iv = setInterval(() => {
+                current--;
+                db.ref('parties/' + partyCode + '/meetingTimer').set(current);
+                
+                db.ref('parties/' + partyCode + '/players').once('value', snap => {
+                    let data = snap.val();
+                    let totalAlive = 0;
+                    let votedCount = 0;
+                    for(let p in data) {
+                        if(data[p].isAlive) {
+                            totalAlive++;
+                            if(data[p].currentVote !== "none") votedCount++;
+                        }
+                    }
+                    
+                    if (current <= 0 || votedCount >= totalAlive) {
+                        clearInterval(iv);
+                        processMeetingResultAndEject();
+                    }
+                });
+            }, 1000);
+        }
+
+        function revealLiveVotesToAll() {
+            db.ref('parties/' + partyCode + '/showVotersIdentity').once('value', showVotersSnap => {
+                const showNames = showVotersSnap.val();
+                db.ref('parties/' + partyCode + '/players').once('value', snap => {
+                    let players = snap.val();
+                    let voteMap = {};
+                    let skipList = [];
+                    
+                    for(let p in players) {
+                        let v = players[p].currentVote;
+                        if(v && v !== "none" && players[p].isAlive) {
+                            if(v === "skip") {
+                                skipList.push(players[p].name);
+                            } else {
+                                if(!voteMap[v]) voteMap[v] = [];
+                                voteMap[v].push(players[p].name);
+                            }
+                        }
+                    }
+                    
+                    for(let target in voteMap) {
+                        let el = document.getElementById(`voters-for-${target}`);
+                        if(el) {
+                            el.style.display = "inline-block";
+                            el.innerText = showNames ? voteMap[target].join(' , ') : `عدد الأصوات: ${voteMap[target].length} 🪪`;
+                        }
+                    }
+                    
+                    if(skipList.length > 0) {
+                        let skEl = document.getElementById('skip-voters-list');
+                        if(skEl) {
+                            skEl.style.display = "inline-block";
+                            skEl.innerText = showNames ? `الممتنعون: ${skipList.join(' , ')}` : `عدد الممتنعين: ${skipList.length} 🗳️`;
+                        }
+                    }
+                });
+            });
+        }
+
+        function processMeetingResultAndEject() {
+            db.ref('parties/' + partyCode + '/meetingStatus').set("revealing");
+            
+            setTimeout(() => {
+                db.ref('parties/' + partyCode + '/players').once('value', snap => {
+                    let players = snap.val();
+                    let counts = {};
+                    let skipCount = 0;
+                    
+                    for(let p in players) {
+                        let v = players[p].currentVote;
+                        if(v && v !== "none" && players[p].isAlive) {
+                            if(v === "skip") skipCount++;
+                            else counts[v] = (counts[v] || 0) + 1;
+                        }
+                    }
+                    
+                    let maxVotes = skipCount;
+                    let candidate = "skip";
+                    let tie = false;
+                    
+                    for(let target in counts) {
+                        if(counts[target] > maxVotes) {
+                            maxVotes = counts[target]; candidate = target; tie = false;
+                        } else if(counts[target] === maxVotes) tie = true;
+                    }
+                    
+                    let resultText = "";
+                    if(tie || candidate === "skip" || maxVotes === 0) {
+                        resultText = "لم يتم طرد أحد من المركبة الفضائية الإقليمية! (تعادل أو تصويت امتناع تخطي) 🌌";
+                    } else {
+                        resultText = `تم إلقاء وطرد اللاعب ${candidate} خارج المركبة الفضائية بنجاح! 🌌`;
+                        db.ref('parties/' + partyCode + '/players/' + candidate + '/isAlive').set(false);
+                    }
+                    
+                    for(let p in players) {
+                        db.ref('parties/' + partyCode + '/players/' + p + '/currentVote').set("none");
+                    }
+                    
+                    db.ref('parties/' + partyCode).update({
+                        meeting: false, meetingFinalResultText: resultText, meetingTimer: null
+                    });
+                    
+                    setTimeout(() => {
+                        db.ref('parties/' + partyCode + '/meetingFinalResultText').set("");
+                        db.ref('parties/' + partyCode + '/meetingStatus').set("idle");
+                    }, 5000);
+                });
+            }, 4000);
+        }
+
+        function setupGhostChatListener() {
+            db.ref('parties/' + partyCode + '/ghostMessages').off();
+            db.ref('parties/' + partyCode + '/ghostMessages').on('child_added', snap => {
+                let msg = snap.val();
+                const box = document.getElementById('ghost-chat-messages');
+                box.innerHTML += `<div class="ghost-msg-line"><span class="ghost-msg-name">[${msg.sender}]:</span> <span class="ghost-msg-text">${msg.text}</span></div>`;
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function sendGhostMessage() {
+            const input = document.getElementById('ghost-msg-input');
+            let text = input.value.trim();
+            if(!text) return;
+            db.ref('parties/' + partyCode + '/ghostMessages').push({ sender: myName, text: text });
+            input.value = "";
+        }
+
+        function leavePartyRoom(wasInGame) {
+            sessionStorage.clear();
+            if(partyCode) {
+                db.ref('parties/' + partyCode + '/players/' + myName).remove();
+                if(wasInGame) calculateGlobalProgress();
+            }
+            location.reload();
+        }
+
+        function handleInstantDeath() {
+            showCustomModal("لقد قُتلت 💀", "تمت تصفيتك بواسطة المندس! تحولت الآن إلى شبح؛ يمكنك الاستمرار بأداء مهامك الصالحة والتحدث براديو الأشباح السرّي.");
+            goToGameplay();
+        }
+
+        // استرجاع المزامنة وحل ثغرة الـ Refresh عبر الـ Session Storage الصارم
+        window.addEventListener('load', () => {
+            let savedParty = sessionStorage.getItem('among_us_reality_party');
+            let savedName = sessionStorage.getItem('among_us_reality_name');
+            let savedSabotageTime = sessionStorage.getItem('sabotage_target_timestamp');
+            
+            if (savedParty && savedName) {
+                db.ref('parties/' + savedParty).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        const pStatus = snapshot.val().status;
+                        if (pStatus === "waiting" || pStatus === "playing") {
+                            partyCode = savedParty; myName = savedName;
+                            isLeader = (snapshot.val().leader === myName);
+                            document.getElementById('tag-name-display').innerText = myName;
+                            document.getElementById('player-identity-tag').style.display = "block";
+                            
+                            activateScreenWakeLock();
+                            setupPartyListeners(); 
+                            
+                            if(savedSabotageTime) {
+                                let targetTime = parseInt(savedSabotageTime);
+                                if(targetTime > Date.now() && snapshot.val().sabotage === true) {
+                                    showSabotageUI(targetTime);
+                                } else {
+                                    sessionStorage.removeItem('sabotage_target_timestamp');
+                                }
+                            }
+                        } else { sessionStorage.clear(); }
+                    } else { sessionStorage.clear(); }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
