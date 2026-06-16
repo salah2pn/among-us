@@ -167,6 +167,11 @@
             justify-content: center; align-items: center; flex-direction: column;
             animation: blink 0.6s infinite alternate;
         }
+
+        #sabotage-alert button {
+    position: relative;
+    z-index: 10001;
+}
         @keyframes blink { from { opacity: 0.95; background: rgba(160,0,0,0.95); } to { opacity: 0.7; background: rgba(30,0,0,0.95); } }
         
         #reader { width: 100%; max-width: 320px; margin: 15px auto; background: #000; border: 5px dashed var(--button-color); border-radius: 16px; overflow: hidden; }
@@ -473,7 +478,54 @@
             { id: 16, text: "إعادة تدوير النفايات الميدانية", desc: "اجمع 3 مخلفات فارغة من الأرض واقعياً وضعها بسلة المهملات، ثم التقط صورة حية واحدة واضحة لها لإرسالها.", location: ["house", "forest"], type: "recycling" },
             { id: 17, text: "البصمات الجنائية العشوائية", desc: "ابحث ميدانياً عن أغراض تطابق اللون المختار عشوائياً، والتقط 3 صور حية في ألبوم المهام للأدلة.", location: ["house", "forest"], type: "fingerprints" },
             { id: 19, text: "عينة أوراق الشجر البيئية", desc: "ابحث في أرجاء الغابة عن ورقة جافة تماماً وأخرى خضراء يانعة والتقط لهما صورة واضحة معاً على كف يدك كدليل بيئي.", location: ["forest"], type: "leaf" },
-            { id: 20, text: "تحديد الشمال الجغرافي والقبلة", desc: "در بجسدك مستعيناً بالبوصلة المغناطيسية الحقيقية للهاتف حتى تتجه نحو الشمال الدقيق (زاوية 0) وتثبت لثانيتين.", location: ["house", "forest"], type: "compass" }
+            { id: 20, text: "تحديد الشمال الجغرافي والقبلة", desc: "در بجسدك مستعيناً بالبوصلة المغناطيسية الحقيقية للهاتف حتى تتجه نحو الشمال الدقيق (زاوية 0) وتثبت لثانيتين.", location: ["house", "forest"], type: "compass" },
+        {
+    id: 21,
+    text: "الذاكرة التناظرية (Pattern Match Test)",
+    desc: "افتح البطاقات وقم بمطابقة الأزواج المتشابهة (6 أزواج من الرموز الإلكترونية).",
+    location: ["house", "forest"],
+    type: "memory_match"
+},
+{
+    id: 22,
+    text: "فك تشفير المفاعل المتسلسل (Unlock Manifold)",
+    desc: "اضغط على الأرقام من 1 إلى 20 بالترتيب الصحيح. أي خطأ يعيد الترتيب.",
+    location: ["house", "forest"],
+    type: "sequence_unlock"
+},
+{
+    id: 23,
+    text: "ثبات رائد الفضاء (The Anti-Gravity Test)",
+    desc: "اثبت الهاتف عمودياً بزاوية صحيحة لمدة 15 ثانية دون اهتزاز أو ميلان.",
+    location: ["house", "forest"],
+    type: "balance_test"
+},
+{
+    id: 24,
+    text: "البصمات الثلاث (Triple Identity Scan)",
+    desc: "جمع 3 بصمات من مستخدمين مختلفين لإثبات الهوية البيولوجية.",
+    location: ["house", "forest"],
+    type: "fingerprints"
+},
+{
+    id: 25,
+    text: "توصيل النظائر المشعة (DNA Match)",
+    desc: "حل 3 مراحل من تسلسل الحمض النووي عبر اختيار القطعة الصحيحة.",
+    location: ["house", "forest"],
+    type: "dna_match"
+},
+{ id: 26, text: "كتابة أسماء الحاضرين", desc: "اكتب أسماء جميع الأشخاص الموجودين في المكان حسب البيئة (بيت أو غابة) ثم أرسل التوثيق.", location: ["house", "forest"], type: "attendees_names" },
+{ id: 27, text: "تجهيز السفرة لشخصين", desc: "قم بتجهيز مائدة واقعية لشخصين تحتوي على صحن وأدوات طعام ثم التقط صورة كدليل.", location: ["house"], type: "table_setup" },
+{ id: 28, text: "إحضار كأسي ماء للاعبين", desc: "التقط صورتين منفصلتين لكأس ماء مع لاعبين مختلفين ثم أرسل الإثبات.", location: ["house", "forest"], type: "two_cups" },
+{ id: 29, text: "جلب شيء من السيارة", desc: "أحضر غرض من السيارة وضعه على الطاولة ثم التقط صورة توثيقية.", location: ["house", "forest"], type: "car_item" },
+{ id: 30, text: "ترتيب الكنبة وتنظيمها", desc: "قم بترتيب وسائد الكنبة بشكل منظم ثم التقط صورة نهائية.", location: ["house"], type: "sofa_order" },
+{ id: 31, text: "تصوير جميع اللاعبين", desc: "التقط صورة لكل لاعب في الغرفة حسب عدد اللاعبين ثم أرسل الألبوم الكامل.", location: ["house", "forest"], type: "all_players_photo" },
+{ id: 32, text: "صورة سيلفي ثلاثية", desc: "التقط صورة سيلفي تجمع 3 لاعبين داخل إطار واحد كتوثيق جماعي.", location: ["house", "forest"], type: "triple_selfie" },
+{ id: 33, text: "ورقة HELP التوثيقية", desc: "اكتب كلمة HELP على ورقة وضعها على الطاولة ثم أكد المهمة.", location: ["house"], type: "help_paper" },
+{ id: 34, text: "الهيكل الهندسي المتوازن", desc: "ابنِ برج أو هيكل واقعي ثم التقط صورة عمودية له كدليل.", location: ["house", "forest"], type: "stacking" }
+        
+        
+        
         ];
 
         let myTasks = []; 
@@ -490,7 +542,7 @@
         function generateRandomTasksForMe(locationFromDb) {
             let filtered = ALL_TASKS_POOL.filter(t => t.location.includes(locationFromDb));
             let shuffled = filtered.sort(() => 0.5 - Math.random());
-            let selected = shuffled.slice(0, 10);
+let selected = shuffled.slice(0, Math.min(15, shuffled.length));
             myTasks = selected.map(t => {
                 return { id: t.id, text: t.text, desc: t.desc, type: t.type, done: false };
             });
@@ -951,7 +1003,7 @@
                                     if (matchedColor === activeColor) {
                                         connectedCount++;
                                         if (connectedCount === 4) {
-                                            if (stage < 3) {
+                                            if (stage < 6) {
                                                 stage++;
                                                 loadWireStage();
                                             } else {
@@ -1168,99 +1220,132 @@
                 }
             }
             // 6. مهمة تنظيف الشاشة الملوثة (Screen Wiper) المعتمدة على النقاء (Clean Progress)
-            else if (task.type === "wiper") {
-                area.innerHTML = `
-                    <div class="wiper-scratch-area">
-                        <div class="wiper-clean-overlay" id="wiperPctLabel">مؤشر النقاء: 0%</div>
-                        <canvas class="wiper-scratch-canvas" id="wiperScratchCanvas"></canvas>
-                    </div>
-                `;
-                setTimeout(() => {
-                    let cv = document.getElementById('wiperScratchCanvas');
-                    if(!cv) return;
-                    let ctx = cv.getContext('2d');
-                    cv.width = cv.parentElement.clientWidth;
-                    cv.height = cv.parentElement.clientHeight;
-                    
-                    ctx.fillStyle = "#1e293b"; 
-                    ctx.fillRect(0,0,cv.width,cv.height);
-                    
-                    let totalPixels = cv.width * cv.height;
-                    let scratchedPixelsEstimate = 0;
-                    
-                    function scrubAction(x, y) {
-                        ctx.globalCompositeOperation = 'destination-out';
-                        ctx.beginPath();
-                        ctx.arc(x, y, 22, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        scratchedPixelsEstimate += Math.PI * 22 * 22;
-                        let cleanProgress = Math.floor((scratchedPixelsEstimate / (totalPixels * 1.4)) * 100);
-                        if(cleanProgress > 100) cleanProgress = 100;
-                        
-                        document.getElementById('wiperPctLabel').innerText = `مؤشر النقاء الحقيقي: ${cleanProgress}%`;
-                        
-                        if (cleanProgress >= 100) {
-                            cv.ontouchmove = null; cv.onmousemove = null;
-                            pushToLiveAdminLog(task.text, "تم قشط وتلميع طبقة غبار الشاشة الداكنة بالكامل ورفع نسبة النقاء إلى 100%", "text", "Screen Cleaned 100%");
-                            completeActiveTaskLocal();
-                        }
-                    }
-                    
-                    cv.ontouchmove = (e) => {
-                        let t = e.touches[0];
-                        let r = cv.getBoundingClientRect();
-                        scrubAction(t.clientX - r.left, t.clientY - r.top);
-                    };
-                    cv.onmousemove = (e) => {
-                        if(e.buttons === 1) scrubAction(e.offsetX, e.offsetY);
-                    };
-                }, 100);
+            else if(task.type === "wiper") {
+    let progress = 0;
+
+    area.innerHTML = `
+        <div class="wiper-scratch-area" id="wiperArea" style="position:relative; overflow:hidden;">
+            <div class="wiper-clean-overlay" style="
+                position:absolute;
+                width:100%;
+                height:100%;
+                background:#111827;
+                opacity:0.9;
+                pointer-events:none;
+            "></div>
+        </div>
+        <p id="wiperProgress">0%</p>
+    `;
+
+    const wiperArea = document.getElementById("wiperArea");
+
+    let wipedPixels = new Set();
+
+    function getKey(x, y) {
+        // تقسيم الشاشة لخلايا صغيرة (grid)
+        let gx = Math.floor(x / 10);
+        let gy = Math.floor(y / 10);
+        return gx + "-" + gy;
+    }
+
+    function handleWipe(e) {
+        let rect = wiperArea.getBoundingClientRect();
+
+        let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+        let key = getKey(x, y);
+
+        if (!wipedPixels.has(key)) {
+            wipedPixels.add(key);
+
+            // تحديث النسبة بناءً على المساحة المغطاة
+            let totalCells = Math.floor(rect.width / 10) * Math.floor(rect.height / 10);
+            progress = Math.floor((wipedPixels.size / totalCells) * 100);
+
+            document.getElementById("wiperProgress").innerText = progress + "%";
+
+            if (progress >= 100) {
+                pushToLiveAdminLog(task.text, "تم تنظيف الشاشة بالكامل بمسح فعلي", "text", "WIPE DONE");
+                completeActiveTaskLocal();
             }
+        }
+    }
+
+    wiperArea.addEventListener("mousemove", handleWipe);
+    wiperArea.addEventListener("touchmove", handleWipe);
+}
             // 7. مهمة عداد الخطوات الاضطراري (Step Counter) المربوطة بحساس التسارع الفعلي للهاتف
             else if (task.type === "steps") {
-                let stepCount = 0;
-                let lastX = null, lastY = null, lastZ = null;
-                
-                area.innerHTML = `
-                    <div style="background:#0f172a; padding:20px; border-radius:16px; border:2px solid #3b82f6;">
-                        <h1 id="step-counter-label" style="font-size:4rem; color:#3b82f6; margin:0;">0</h1>
-                        <p style="font-weight:bold; color:#fff;">خطوة مرصودة حقيقية 🏃‍♂️</p>
-                        <p style="font-size:0.9rem; color:#94a3b8;">يرجى السير أو الهرولة الحقيقية في المكان الحركي لتسجيل الـ 100 خطوة كاملة.</p>
-                    </div>
-                `;
-                
-                function motionHandler(event) {
-                    let acc = event.accelerationIncludingGravity;
-                    if(!acc) return;
-                    
-                    if (lastX !== null) {
-                        let deltaX = Math.abs(acc.x - lastX);
-                        let deltaY = Math.abs(acc.y - lastY);
-                        let deltaZ = Math.abs(acc.z - lastZ);
-                        
-                        // تطبيق فحص التسارع الميكانيكي الحقيقي المعتمد على عتبة الحركة الجسدية
-                        if ((deltaX + deltaY + deltaZ) > 13) {
-                            stepCount++;
-                            let lbl = document.getElementById('step-counter-label');
-                            if(lbl) lbl.innerText = stepCount;
-                            
-                            if (stepCount >= 100) {
-                                window.removeEventListener('devicemotion', motionHandler);
-                                pushToLiveAdminLog(task.text, "سجل اللاعب 100 خطوة ميكانيكية حركية فعلية مرصودة بحساس التسارع للهاتف الذكي", "text", "100 Steps Completed");
-                                completeActiveTaskLocal();
-                            }
-                        }
-                    }
-                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
-                }
-                
-                if (window.DeviceMotionEvent) {
-                    window.addEventListener('devicemotion', motionHandler);
-                } else {
-                    area.innerHTML += `<button class="btn-main" onclick="completeActiveTaskLocal()">مستشعر الارتجاج غير مدعوم بالجهاز - اضغط لتخطي محاكي الأمانة</button>`;
-                }
-            }
+    let stepCount = 0;
+
+    let lastMagnitude = 0;
+    let lastStepTime = 0;
+
+    area.innerHTML = `
+        <div style="background:#0f172a; padding:20px; border-radius:16px; border:2px solid #3b82f6;">
+            <h1 id="step-counter-label" style="font-size:4rem; color:#3b82f6; margin:0;">0</h1>
+            <p style="font-weight:bold; color:#fff;">خطوة مرصودة حقيقية 🏃‍♂️</p>
+            <p style="font-size:0.9rem; color:#94a3b8;">تحريك الهاتف أثناء المشي فقط يتم احتسابه.</p>
+        </div>
+    `;
+
+    function motionHandler(event) {
+        let acc = event.accelerationIncludingGravity;
+        if (!acc) return;
+
+        let now = Date.now();
+
+        // حساب قوة الحركة (magnitude)
+        let magnitude = Math.sqrt(
+            acc.x * acc.x +
+            acc.y * acc.y +
+            acc.z * acc.z
+        );
+
+        // فرق الحركة بين اللحظات
+        let delta = Math.abs(magnitude - lastMagnitude);
+
+        // 🔥 فلترة قوية ضد الاهتزاز العشوائي
+        if (
+            delta > 6 &&              // لازم حركة واضحة
+            now - lastStepTime > 350 // منع التكرار السريع
+        ) {
+            stepCount++;
+            lastStepTime = now;
+
+            let lbl = document.getElementById('step-counter-label');
+            if (lbl) lbl.innerText = stepCount;
+        }
+
+        lastMagnitude = magnitude;
+
+        if (stepCount >= 100) {
+            window.removeEventListener('devicemotion', motionHandler);
+
+            pushToLiveAdminLog(
+                task.text,
+                "تم تسجيل 100 خطوة حركية حقيقية باستخدام تحليل التسارع المتقدم",
+                "text",
+                "100 Steps Completed"
+            );
+
+            completeActiveTaskLocal();
+        }
+    }
+
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', motionHandler);
+    } else {
+        area.innerHTML += `
+            <button class="btn-main" onclick="completeActiveTaskLocal()">
+                المستشعر غير مدعوم - تخطي المهمة
+            </button>
+        `;
+    }
+}
             // 8. مهمة تعديل التردد اللاسلكي (Radio Tune) بواسطة السلايدر والموجة الجيبية
             else if (task.type === "radio") {
                 let targetFreq = Math.floor(40 + Math.random() * 50);
@@ -1486,7 +1571,7 @@
             // 12. مهمة نمط القفل الإلكتروني (Pattern Lock) بحركة سحب واحدة متصلة
             else if (task.type === "pattern") {
                 area.innerHTML = `
-                    <p style="font-weight:bold; color:var(--button-color);">النمط المطلوب: قم بتوصيل النقاط الثلاث بالصف العلوي (1 ← 2 ← 3) بحركة سحب متصلة!</p>
+                    <p style="font-weight:bold; color:var(--button-color);">النمط المطلوب: قم بتوصيل النقاط  بحركة سحب متصلة!</p>
                     <div class="pattern-lock-board" id="patternBoard">
                         <div class="pattern-lock-dot" data-index="1"></div>
                         <div class="pattern-lock-dot" data-index="2"></div>
@@ -1500,48 +1585,101 @@
                     </div>
                 `;
                 setTimeout(() => {
-                    let board = document.getElementById('patternBoard');
-                    let connectedIndices = [];
-                    let isDrawingPattern = false;
-                    
-                    function checkDotCollision(clientX, clientY) {
-                        let dots = document.querySelectorAll('.pattern-lock-dot');
-                        dots.forEach(dot => {
-                            let rect = dot.getBoundingClientRect();
-                            if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
-                                let idx = parseInt(dot.getAttribute('data-index'));
-                                if (!connectedIndices.includes(idx)) {
-                                    connectedIndices.push(idx);
-                                    dot.classList.add('active');
-                                }
-                            }
-                        });
-                    }
-                    
-                    board.ontouchstart = (e) => {
-                        isDrawingPattern = true;
-                        connectedIndices = [];
-                        document.querySelectorAll('.pattern-lock-dot').forEach(d => d.classList.remove('active'));
-                        checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
-                    };
-                    
-                    board.ontouchmove = (e) => {
-                        if(!isDrawingPattern) return;
-                        checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
-                    };
-                    
-                    board.ontouchend = () => {
-                        isDrawingPattern = false;
-                        // التحقق من مطابقة النمط المطلوب الصارم هندسياً وهو توصيل النقاط 1 ثم 2 ثم 3 بالترتيب
-                        if (connectedIndices.length === 3 && connectedIndices[0] === 1 && connectedIndices[1] === 2 && connectedIndices[2] === 3) {
-                            pushToLiveAdminLog(task.text, "تم رسم النمط الهندسي الصحيح وفك القفل الإلكتروني بأمان", "text", "Pattern Connected");
-                            completeActiveTaskLocal();
-                        } else {
-                            showCustomModal("نمط خاطئ ❌", "النمط المدخل غير مطابق للشكل التوضيحي المطلوب! حاول السحب المتصل للنقاط الثلاثة العلوية بالترتيب.");
-                            document.querySelectorAll('.pattern-lock-dot').forEach(d => d.classList.remove('active'));
-                        }
-                    };
-                }, 100);
+    let board = document.getElementById('patternBoard');
+    let connectedIndices = [];
+    let isDrawingPattern = false;
+
+    const dots = Array.from(document.querySelectorAll('.pattern-lock-dot'));
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    const patternLength = 7 + Math.floor(Math.random() * 3); // 7 - 9
+    const pattern = shuffle([1,2,3,4,5,6,7,8,9]).slice(0, patternLength);
+
+    // 🔥 عرض النمط للاعب ثم إخفاؤه
+    function showPattern(callback) {
+        let i = 0;
+
+        function lightNext() {
+            if (i > 0) {
+                let prev = dots.find(d => +d.dataset.index === pattern[i - 1]);
+                if (prev) prev.classList.remove('active');
+            }
+
+            if (i < pattern.length) {
+                let current = dots.find(d => +d.dataset.index === pattern[i]);
+                if (current) current.classList.add('active');
+                i++;
+                setTimeout(lightNext, 600);
+            } else {
+                // تنظيف آخر نقطة
+                setTimeout(() => {
+                    dots.forEach(d => d.classList.remove('active'));
+                    callback();
+                }, 400);
+            }
+        }
+
+        lightNext();
+    }
+
+    function checkDotCollision(clientX, clientY) {
+        dots.forEach(dot => {
+            let rect = dot.getBoundingClientRect();
+            if (
+                clientX > rect.left &&
+                clientX < rect.right &&
+                clientY > rect.top &&
+                clientY < rect.bottom
+            ) {
+                let idx = parseInt(dot.getAttribute('data-index'));
+                if (!connectedIndices.includes(idx)) {
+                    connectedIndices.push(idx);
+                    dot.classList.add('active');
+                }
+            }
+        });
+    }
+
+    function enablePlay() {
+        isDrawingPattern = true;
+
+        board.ontouchstart = (e) => {
+            connectedIndices = [];
+            dots.forEach(d => d.classList.remove('active'));
+            checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+        };
+
+        board.ontouchmove = (e) => {
+            if (!isDrawingPattern) return;
+            checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+        };
+
+        board.ontouchend = () => {
+            let correct =
+                connectedIndices.length === pattern.length &&
+                connectedIndices.every((v, i) => v === pattern[i]);
+
+            if (correct) {
+                pushToLiveAdminLog(task.text, "تم حل النمط بنجاح", "text", "Pattern Connected");
+                completeActiveTaskLocal();
+            } else {
+                showCustomModal("نمط خاطئ ❌", "حاول مرة ثانية وركز على الترتيب!");
+                dots.forEach(d => d.classList.remove('active'));
+            }
+        };
+    }
+
+    // 🚀 البداية: عرض النمط ثم السماح باللعب
+    showPattern(enablePlay);
+
+}, 100);
             }
             // 13. مهمة توجيه الهوائي اللاسلكي (Satellite Align) تدوير دائري حركي دقيق لـ 100%
             else if (task.type === "satellite") {
@@ -1602,91 +1740,140 @@
             }
             // 14. مهمة تتابع الأنوار الأمنية (Simon Says) بـ 3 مراحل متتالية وتصفير المحاولة عند الخطأ
             else if (task.type === "simon") {
-                let simonColors = ["#ef4444", "#3b82f6", "#eab308", "#22c55e"]; // أحمر، أزرق، أصفر، أخضر
-                let simonSequence = [];
-                let playerSequence = [];
-                let currentSimonStage = 1;
-                
-                area.innerHTML = `
-                    <p id="simon-status-msg" style="font-weight:bold; color:var(--button-color);">راقب وميض الإضاءة الأمنية لتكراره...</p>
-                    <div class="simon-board">
-                        <div class="simon-quadrant" id="simon-0" style="background:#ef4444;"></div>
-                        <div class="simon-quadrant" id="simon-1" style="background:#3b82f6;"></div>
-                        <div class="simon-quadrant" id="simon-2" style="background:#eab308;"></div>
-                        <div class="simon-quadrant" id="simon-3" style="background:#22c55e;"></div>
-                    </div>
-                `;
-                
-                function playSequenceAnimation() {
-                    playerSequence = [];
-                    let msg = document.getElementById('simon-status-msg');
-                    if(msg) msg.innerText = `جاري عرض التتابع للمرحلة: ${currentSimonStage} / 3 ⚡`;
-                    
-                    disableSimonBoardClicks(true);
-                    let i = 0;
-                    let iv = setInterval(() => {
-                        if (i >= simonSequence.length) {
-                            clearInterval(iv);
-                            disableSimonBoardClicks(false);
-                            if(msg) msg.innerText = "أعد نقر الأزرار الملونة الآن بنفس الترتيب التتابعي!";
-                            return;
-                        }
-                        let quadIdx = simonSequence[i];
-                        let el = document.getElementById("simon-" + quadIdx);
-                        if(el) {
-                            el.style.opacity = "1";
-                            setTimeout(() => { el.style.opacity = "0.4"; }, 400);
-                        }
-                        i++;
-                    }, 700);
-                }
-                
-                function disableSimonBoardClicks(disabled) {
-                    for(let k=0; k<4; k++) {
-                        let el = document.getElementById("simon-" + k);
-                        if(el) el.style.pointerEvents = disabled ? "none" : "auto";
-                    }
-                }
-                
-                function handleQuadrantClick(idx) {
-                    let el = document.getElementById("simon-" + idx);
-                    if(el) {
-                        el.style.opacity = "1";
-                        setTimeout(() => { el.style.opacity = "0.4"; }, 200);
-                    }
-                    playerSequence.push(idx);
-                    
-                    // فحص مطابقة خطوة التتابع الحالية مباشرة
-                    let currentStepIdx = playerSequence.length - 1;
-                    if (playerSequence[currentStepIdx] !== simonSequence[currentStepIdx]) {
-                        showCustomModal("نقرة خاطئة ❌", "لم تطابق التتابع الأمني المضيء! تم تصفير المحاولة للمرحلة الأولى لإعادة الفحص.");
-                        currentSimonStage = 1;
-                        simonSequence = [Math.floor(Math.random() * 4)];
-                        playSequenceAnimation();
-                        return;
-                    }
-                    
-                    if (playerSequence.length === simonSequence.length) {
-                        if (currentSimonStage < 3) {
-                            currentSimonStage++;
-                            simonSequence.push(Math.floor(Math.random() * 4));
-                            setTimeout(() => { playSequenceAnimation(); }, 800);
-                        } else {
-                            pushToLiveAdminLog(task.text, "أتم بنجاح مطابقة تتابع الأنوار الأمنية لـ 3 مراحل كاملة دون أي خطأ نقر", "text", "Simon Says 3/3 Win");
-                            completeActiveTaskLocal();
-                        }
-                    }
-                }
-                
-                setTimeout(() => {
-                    for(let k=0; k<4; k++) {
-                        let el = document.getElementById("simon-" + k);
-                        if(el) el.onclick = () => handleQuadrantClick(k);
-                    }
-                    simonSequence = [Math.floor(Math.random() * 4)];
-                    playSequenceAnimation();
-                }, 100);
+
+    let simonSequence = [];
+    let playerSequence = [];
+
+    let round = 1;
+    const totalRounds = 3;
+
+    let currentLength = 7 + Math.floor(Math.random() * 3);
+
+    area.innerHTML = `
+        <p id="simon-status-msg" style="font-weight:bold; color:var(--button-color);">
+            راقب التتابع الأمني...
+        </p>
+
+        <div class="simon-board">
+            <div class="simon-quadrant" id="simon-0" style="background:#ef4444;"></div>
+            <div class="simon-quadrant" id="simon-1" style="background:#3b82f6;"></div>
+            <div class="simon-quadrant" id="simon-2" style="background:#eab308;"></div>
+            <div class="simon-quadrant" id="simon-3" style="background:#22c55e;"></div>
+        </div>
+    `;
+
+    function generateSequence() {
+        simonSequence = [];
+        for (let i = 0; i < currentLength; i++) {
+            simonSequence.push(Math.floor(Math.random() * 4));
+        }
+    }
+
+    function playSequence() {
+
+        playerSequence = [];
+
+        let msg = document.getElementById("simon-status-msg");
+        if (msg) msg.innerText = `الجولة ${round} / ${totalRounds}`;
+
+        disable(false);
+
+        let i = 0;
+
+        let iv = setInterval(() => {
+
+            if (i >= simonSequence.length) {
+                clearInterval(iv);
+                disable(true);
+                if (msg) msg.innerText = "أعد التكرار 👇";
+                return;
             }
+
+            let el = document.getElementById("simon-" + simonSequence[i]);
+
+            if (el) {
+                el.style.opacity = "1";
+                setTimeout(() => el.style.opacity = "0.4", 350);
+            }
+
+            i++;
+
+        }, 600);
+    }
+
+    function disable(state) {
+        for (let i = 0; i < 4; i++) {
+            let el = document.getElementById("simon-" + i);
+            if (el) el.style.pointerEvents = state ? "none" : "auto";
+        }
+    }
+
+    function fail() {
+
+        showCustomModal("خطأ ❌", "تم إعادة التحدي من البداية");
+
+        round = 1;
+        currentLength = 7 + Math.floor(Math.random() * 3);
+
+        generateSequence();
+        setTimeout(playSequence, 500);
+    }
+
+    function handleClick(idx) {
+
+        let el = document.getElementById("simon-" + idx);
+        if (el) {
+            el.style.opacity = "1";
+            setTimeout(() => el.style.opacity = "0.4", 200);
+        }
+
+        playerSequence.push(idx);
+
+        let step = playerSequence.length - 1;
+
+        if (playerSequence[step] !== simonSequence[step]) {
+            fail();
+            return;
+        }
+
+        // ✔️ انتهاء الجولة
+        if (playerSequence.length === simonSequence.length) {
+
+            if (round < totalRounds) {
+
+                round++;
+                currentLength = 7 + Math.floor(Math.random() * 3);
+
+                generateSequence();
+
+                setTimeout(playSequence, 700);
+
+            } else {
+
+                pushToLiveAdminLog(
+                    task.text,
+                    "أكمل 3 جولات Simon بنجاح",
+                    "text",
+                    "SIMON 3 ROUNDS WIN"
+                );
+
+                completeActiveTaskLocal();
+            }
+        }
+    }
+
+    setTimeout(() => {
+
+        for (let i = 0; i < 4; i++) {
+            let el = document.getElementById("simon-" + i);
+            if (el) el.onclick = () => handleClick(i);
+        }
+
+        generateSequence();
+        playSequence();
+
+    }, 100);
+}
             // 15. مهمة فرز الفيروسات الرقمية (Virus Quarantine) بتفجير 15 كرة حمراء وتفادي الخضراء
             else if (task.type === "virus") {
                 let killedVirusCount = 0;
@@ -1947,7 +2134,679 @@
                     area.innerHTML += `<button class="btn-main" onclick="completeActiveTaskLocal()">مستشعر البوصلة المغناطيسي غير مدعوم بجهازك - اضغط لتخطي محاكي الأمانة</button>`;
                 }
             }
-            
+            else if(task.type === "memory_match") {
+
+    const symbols = ["🔌","🔋","⚙️","💾","🧠","🔐"];
+    let cards = [...symbols, ...symbols]
+        .sort(() => Math.random() - 0.5);
+
+    let first = null;
+    let second = null;
+    let locked = false;
+    let matched = 0;
+
+    area.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            ${cards.map((s,i)=>`
+                <div class="mem-card" data-index="${i}"
+                    style="height:70px;display:flex;align-items:center;justify-content:center;
+                    background:#1f2937;color:#1f2937;font-size:2rem;border-radius:10px;">
+                    ❓
+                </div>
+            `).join("")}
+        </div>
+    `;
+
+    const els = document.querySelectorAll(".mem-card");
+
+    els.forEach(el=>{
+        el.onclick = () => {
+
+            if (locked) return;
+            if (el.classList.contains("done")) return;
+
+            let i = +el.dataset.index;
+            el.innerText = cards[i];
+            el.style.color = "#fff";
+
+            if (!first) {
+                first = el;
+                return;
+            }
+
+            second = el;
+            locked = true;
+
+            if (first.innerText === second.innerText) {
+                first.classList.add("done");
+                second.classList.add("done");
+                matched++;
+
+                first = null;
+                second = null;
+                locked = false;
+
+                if (matched === 6) {
+                    pushToLiveAdminLog(task.text, "تم مطابقة كل الأزواج", "text", "MEMORY DONE");
+                    completeActiveTaskLocal();
+                }
+
+            } else {
+                setTimeout(()=>{
+                    first.innerText = "❓";
+                    second.innerText = "❓";
+                    first = null;
+                    second = null;
+                    locked = false;
+                },600);
+            }
+        };
+    });
+}
+else if(task.type === "sequence_unlock") {
+
+    let next = 1;
+
+    let nums = Array.from({length:20},(_,i)=>i+1)
+        .sort(() => Math.random() - 0.5);
+
+    area.innerHTML = `
+        <p style="color:#fff;">اضغط الأرقام من 1 إلى 20 بالترتيب</p>
+        <div id="grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
+    `;
+
+    const grid = document.getElementById("grid");
+
+    function render() {
+        grid.innerHTML = nums.map(n=>`
+            <div class="num"
+                data-n="${n}"
+                style="padding:10px;background:#334155;color:#fff;
+                text-align:center;border-radius:8px;cursor:pointer;">
+                ${n}
+            </div>
+        `).join("");
+    }
+
+    function reset() {
+        next = 1;
+        nums = Array.from({length:20},(_,i)=>i+1)
+            .sort(() => Math.random() - 0.5);
+        render();
+    }
+
+    render();
+
+    grid.onclick = (e) => {
+        if (!e.target.dataset.n) return;
+
+        let val = +e.target.dataset.n;
+
+        if (val === next) {
+            e.target.style.opacity = "0.3";
+            next++;
+
+            if (next === 21) {
+                pushToLiveAdminLog(task.text, "تم فك التسلسل بنجاح", "text", "SEQ DONE");
+                completeActiveTaskLocal();
+            }
+
+        } else {
+            reset();
+            showCustomModal("خطأ ❌", "تم إعادة الترتيب بسبب خطأ!");
+        }
+    };
+}
+
+else if(task.type === "balance_test") {
+
+    area.innerHTML = `
+        <h1 id="bal-time" style="color:#fff;">15</h1>
+        <p style="color:#94a3b8;">حافظ على الهاتف مستقيم بدون ميلان</p>
+    `;
+
+    let stableTime = 15;
+    let interval = null;
+
+    function handler(e) {
+        let g = e.beta || 0; // ميل أمام/خلف
+
+        if (Math.abs(g) <= 6) {
+            if (!interval) {
+                interval = setInterval(()=>{
+                    stableTime--;
+                    document.getElementById("bal-time").innerText = stableTime;
+
+                    if (stableTime <= 0) {
+                        window.removeEventListener("deviceorientation", handler);
+                        clearInterval(interval);
+
+                        pushToLiveAdminLog(task.text, "نجاح اختبار التوازن", "text", "BALANCE DONE");
+                        completeActiveTaskLocal();
+                    }
+                },1000);
+            }
+        } else {
+            clearInterval(interval);
+            interval = null;
+            stableTime = 15;
+            document.getElementById("bal-time").innerText = stableTime;
+        }
+    }
+
+    window.addEventListener("deviceorientation", handler);
+}
+   else if(task.type === "dna_match") {
+
+    let stage = 0;
+
+    const puzzles = [
+        {
+            left: "A-T-G-C",
+            options: ["T-A-C-G", "A-T-G-C", "G-G-A-T", "C-A-T-G"],
+            correct: 1
+        },
+        {
+            left: "C-G-A-T",
+            options: ["C-G-A-T", "A-A-T-C", "G-C-T-A", "T-G-C-A"],
+            correct: 0
+        },
+        {
+            left: "G-T-C-A",
+            options: ["C-A-G-T", "G-T-C-A", "T-T-G-A", "A-C-T-G"],
+            correct: 1
+        }
+    ];
+
+    function render() {
+
+        let p = puzzles[stage];
+
+        area.innerHTML = `
+            <div style="padding:20px;background:#0f172a;color:#fff;">
+                <h3>🧬 المرحلة ${stage+1}</h3>
+                <p>السلسلة: <b>${p.left}</b></p>
+
+                <div style="display:grid;gap:10px;">
+                    ${p.options.map((o,i)=>`
+                        <button class="dna-opt" data-i="${i}">
+                            ${o}
+                        </button>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+
+        document.querySelectorAll(".dna-opt").forEach(btn=>{
+            btn.onclick = () => {
+
+                let i = +btn.dataset.i;
+
+                if (i === p.correct) {
+                    stage++;
+
+                    if (stage === puzzles.length) {
+                        pushToLiveAdminLog(task.text,
+                            "تم إكمال DNA sequencing",
+                            "text",
+                            "DNA DONE");
+
+                        completeActiveTaskLocal();
+                    } else {
+                        render();
+                    }
+
+                } else {
+                    showCustomModal("خطأ", "تم إعادة المحاولة من البداية");
+                    stage = 0;
+                    render();
+                }
+            };
+        });
+    }
+
+    render();
+}
+else if(task.type === "fingerprints") {
+
+    let touches = new Set();
+    let completed = 0;
+
+    area.innerHTML = `
+        <div style="padding:20px;background:#111827;color:#fff;border-radius:12px;">
+            <h2>🧬 البصمات الثلاث</h2>
+            <p>3 بصمات مطلوبة من 3 مستخدمين مختلفين</p>
+            <h3 id="fp-count">0 / 3</h3>
+
+            <button id="scanBtn" class="btn-main">تسجيل بصمة</button>
+        </div>
+    `;
+
+    function fakePersonId() {
+        return navigator.userAgent + screen.width + screen.height;
+    }
+
+    document.getElementById("scanBtn").onclick = () => {
+
+        let id = fakePersonId();
+
+        if (touches.has(id)) {
+            showCustomModal("تم التسجيل", "هذا الجهاز مسجل مسبقاً!");
+            return;
+        }
+
+        touches.add(id);
+        completed++;
+
+        document.getElementById("fp-count").innerText =
+            completed + " / 3";
+
+        if (completed >= 3) {
+            pushToLiveAdminLog(task.text,
+                "تم جمع 3 بصمات مختلفة",
+                "text",
+                "FINGERPRINT DONE");
+
+            completeActiveTaskLocal();
+        }
+    };
+}         
+
+else if(task.type === "attendees_names") {
+
+    let placeText = task.location.includes("forest")
+        ? "اكتب أسماء جميع من معنا في الغابة"
+        : "اكتب جميع أسماء الأشخاص الموجودين في البيت";
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">${placeText}</p>
+
+        <textarea id="attendees-input" style="width:95%;height:120px;"></textarea>
+
+        <button class="btn-main" id="attendees-submit" disabled>
+            إرسال السجل 📤
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("attendees-input");
+        let btn = document.getElementById("attendees-submit");
+
+        input.oninput = () => {
+            btn.disabled = input.value.trim().length < 5;
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(
+                task.text,
+                "تم تسجيل أسماء الحاضرين ميدانياً",
+                "text",
+                input.value.trim()
+            );
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+else if(task.type === "table_setup") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">تجهيز السفرة لشخصين</p>
+
+        <button class="btn-main" onclick="document.getElementById('table-photo').click()">
+            التقاط صورة المائدة 📸
+        </button>
+
+        <input type="file" accept="image/*" capture="environment"
+            id="table-photo" class="hidden-camera-input">
+
+        <br><img id="table-preview" style="max-width:90%;display:none;margin-top:10px;">
+
+        <button class="btn-crew" id="table-submit" disabled>
+            إرسال الدليل
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("table-photo");
+        let img = document.getElementById("table-preview");
+        let btn = document.getElementById("table-submit");
+
+        input.onchange = (e) => {
+            let file = e.target.files[0];
+            if(!file) return;
+
+            let reader = new FileReader();
+
+            reader.onload = (ev) => {
+                img.src = ev.target.result;
+                img.style.display = "block";
+                btn.disabled = false;
+            };
+
+            reader.readAsDataURL(file);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(
+                task.text,
+                "تم تجهيز سفرة لشخصين بشكل واقعي",
+                "image",
+                img.src
+            );
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+else if(task.type === "two_cups") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">إحضار كأسي ماء للاعبين</p>
+
+        <div>
+            <p>Slot 1</p>
+            <input type="file" accept="image/*" capture="environment" id="cup1">
+            <img id="cup1p" style="max-width:80%;display:none;">
+        </div>
+
+        <div>
+            <p>Slot 2</p>
+            <input type="file" accept="image/*" capture="environment" id="cup2">
+            <img id="cup2p" style="max-width:80%;display:none;">
+        </div>
+
+        <button class="btn-main" id="cups-submit" disabled>
+            إرسال الدليل
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let c1 = document.getElementById("cup1");
+        let c2 = document.getElementById("cup2");
+
+        let p1 = document.getElementById("cup1p");
+        let p2 = document.getElementById("cup2p");
+
+        let btn = document.getElementById("cups-submit");
+
+        function check() {
+            btn.disabled = !(p1.src && p2.src);
+        }
+
+        c1.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                p1.src = ev.target.result;
+                p1.style.display = "block";
+                check();
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        c2.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                p2.src = ev.target.result;
+                p2.style.display = "block";
+                check();
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(
+                task.text,
+                "تم تسليم كأسي ماء للاعبين",
+                "image",
+                JSON.stringify({cup1:p1.src, cup2:p2.src})
+            );
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+else if(task.type === "car_item") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">جلب شيء من السيارة</p>
+
+        <button class="btn-main" onclick="document.getElementById('car-file').click()">
+            تصوير الغرض 📸
+        </button>
+
+        <input type="file" accept="image/*" capture="environment" id="car-file">
+
+        <img id="car-preview" style="max-width:90%;display:none;margin-top:10px;">
+
+        <button class="btn-crew" id="car-submit" disabled>
+            إرسال
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("car-file");
+        let img = document.getElementById("car-preview");
+        let btn = document.getElementById("car-submit");
+
+        input.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                img.src = ev.target.result;
+                img.style.display = "block";
+                btn.disabled = false;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(task.text, "تم جلب عنصر من السيارة", "image", img.src);
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+else if(task.type === "sofa_order") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">ترتيب الكنبة</p>
+
+        <input type="file" accept="image/*" capture="environment" id="sofa-file">
+
+        <img id="sofa-preview" style="max-width:90%;display:none;margin-top:10px;">
+
+        <button class="btn-main" id="sofa-submit" disabled>
+            إرسال
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("sofa-file");
+        let img = document.getElementById("sofa-preview");
+        let btn = document.getElementById("sofa-submit");
+
+        input.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                img.src = ev.target.result;
+                img.style.display = "block";
+                btn.disabled = false;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(task.text, "تم ترتيب الكنبة بشكل صحيح", "image", img.src);
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+else if(task.type === "all_players_photo") {
+
+    let n = task.playerCount || 2;
+    let slots = Array.from({length:n});
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">تصوير جميع اللاعبين</p>
+
+        <div id="gridSlots" style="display:grid;gap:10px;">
+            ${slots.map((_,i)=>`
+                <div>
+                    <p>Player ${i+1}</p>
+                    <input type="file" accept="image/*" capture="environment" id="p${i}">
+                    <img id="p${i}img" style="max-width:80%;display:none;">
+                </div>
+            `).join("")}
+        </div>
+
+        <button class="btn-main" id="all-submit" disabled>
+            إرسال الجميع
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let btn = document.getElementById("all-submit");
+
+        function checkAll() {
+            let done = true;
+            for(let i=0;i<n;i++){
+                let img = document.getElementById("p"+i+"img");
+                if(!img.src) done = false;
+            }
+            btn.disabled = !done;
+        }
+
+        for(let i=0;i<n;i++){
+            let input = document.getElementById("p"+i);
+
+            input.onchange = (e) => {
+                let img = document.getElementById("p"+i+"img");
+                let r = new FileReader();
+
+                r.onload = ev => {
+                    img.src = ev.target.result;
+                    img.style.display = "block";
+                    checkAll();
+                };
+
+                r.readAsDataURL(e.target.files[0]);
+            };
+        }
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(task.text, "تم تصوير جميع اللاعبين", "image", "ALL PLAYERS DONE");
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+else if(task.type === "triple_selfie") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">سيلفي ثلاثي</p>
+
+        <input type="file" accept="image/*" capture="user" id="selfie">
+
+        <img id="selfie-preview" style="max-width:90%;display:none;margin-top:10px;">
+
+        <button class="btn-main" id="selfie-submit" disabled>
+            إرسال
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("selfie");
+        let img = document.getElementById("selfie-preview");
+        let btn = document.getElementById("selfie-submit");
+
+        input.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                img.src = ev.target.result;
+                img.style.display = "block";
+                btn.disabled = false;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(task.text, "تم التقاط سيلفي جماعي", "image", img.src);
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+else if(task.type === "help_paper") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">ورقة HELP</p>
+
+        <button class="btn-main" id="help-btn">
+            👍 قمت بصنع الورقة ووضعها على الطاولة الآن!
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        document.getElementById("help-btn").onclick = () => {
+            pushToLiveAdminLog(task.text, "تم توثيق ورقة HELP ميدانياً", "text", "HELP PAPER");
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+else if(task.type === "stacking") {
+
+    area.innerHTML = `
+        <p style="font-weight:bold;">الهيكل الهندسي المتوازن</p>
+
+        <input type="file" accept="image/*" capture="environment" id="stack-file">
+
+        <img id="stack-preview" style="max-width:90%;display:none;margin-top:10px;">
+
+        <button class="btn-main" id="stack-submit" disabled>
+            إرسال الهيكل
+        </button>
+    `;
+
+    setTimeout(() => {
+
+        let input = document.getElementById("stack-file");
+        let img = document.getElementById("stack-preview");
+        let btn = document.getElementById("stack-submit");
+
+        input.onchange = (e) => {
+            let r = new FileReader();
+            r.onload = ev => {
+                img.src = ev.target.result;
+                img.style.display = "block";
+                btn.disabled = false;
+            };
+            r.readAsDataURL(e.target.files[0]);
+        };
+
+        btn.onclick = () => {
+            pushToLiveAdminLog(task.text, "تم بناء هيكل هندسي واقعي", "image", img.src);
+            completeActiveTaskLocal();
+        };
+
+    }, 100);
+}
+
+
             document.getElementById('task-modal').style.display = "flex";
         }
 
@@ -2040,7 +2899,7 @@
         }
 
         function showSabotageUI(targetTimestamp) {
-            document.getElementById('sabotage-alert').style.display = "flex";
+document.getElementById('sabotage-alert').style.pointerEvents = "auto";
             sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
             
             clearInterval(sabotageCountdownInterval);
@@ -2059,27 +2918,35 @@
             }, 1000);
         }
 
-        function openScanner(mode) {
-            currentScanMode = mode;
-            currentScreenBeforeScanner = document.getElementById('screen-meeting').classList.contains('active') ? 'screen-meeting' : 'screen-gameplay';
-            
-            changeScreen('screen-scanner');
-            
-            if (mode === 'kill') document.getElementById('scanner-instruction').innerText = "وجه الكاميرا فوراً نحو كود الـ QR الخاص باللاعب لتصفية هدفه صامتاً! 🔪";
-            else if (mode === 'sabotage') document.getElementById('scanner-instruction').innerText = "امسح كود QR غرفة الطوارئ الحقيقي لإيقاف التخريب العاجل! 🛠️";
-            else document.getElementById('scanner-instruction').innerText = "امسح رمز جثة أو كود الطوارئ المعتمد لطلب اجتماع طارئ فوراً 🚨";
-            
-            if(html5QrcodeScanner === null) {
-                html5QrcodeScanner = new Html5Qrcode("reader");
+        function openScanner(mode){
+    currentScanMode = mode;
+    changeScreen("screen-scanner");
+
+    if(html5QrcodeScanner){
+        html5QrcodeScanner.clear();
+    }
+
+    html5QrcodeScanner = new Html5Qrcode("reader");
+
+    const config = { fps: 10, qrbox: 250 };
+
+    Html5Qrcode.getCameras().then(devices => {
+        let cameraId = devices[0].id;
+
+        // اختيار الكاميرا الخلفية تلقائياً
+        for(let d of devices){
+            if(d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear")){
+                cameraId = d.id;
             }
-            
-            html5QrcodeScanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => console.log(err));
         }
+
+        html5QrcodeScanner.start(
+            cameraId,
+            config,
+            onScanSuccess
+        );
+    });
+}
 
         function closeScannerAndReturn() {
             if (html5QrcodeScanner) {
