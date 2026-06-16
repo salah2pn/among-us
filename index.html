@@ -3077,32 +3077,81 @@ else if(task.type === "stacking") {
             db.ref('parties/' + partyCode).update({ sabotage: true, sabotageTargetTime: targetTime });
         }
 
-        function showSabotageUI(targetTimestamp) {
+function showSabotageUI(targetTimestamp) {
 
-    let box = document.getElementById('sabotage-alert');
-    if (!box) return;
+    let box = document.getElementById("sabotage-alert");
 
-    box.style.display = "block";
-    box.style.position = "fixed";
-    box.style.zIndex = "999999";
-    box.style.pointerEvents = "auto";
-            sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
-            
-            clearInterval(sabotageCountdownInterval);
-            sabotageCountdownInterval = setInterval(() => {
-                let remaining = Math.ceil((targetTimestamp - Date.now()) / 1000);
-                if (remaining < 0) remaining = 0;
-                document.getElementById('sabotage-countdown').innerText = remaining;
-                
-                if (remaining <= 0) {
-                    clearInterval(sabotageCountdownInterval);
-                    if (isLeader) {
-                        db.ref('parties/' + partyCode + '/status').set("ended");
-                        db.ref('parties/' + partyCode + '/meetingFinalResultText').set("انتهى الوقت المحدود! انفجرت منشأة الطاقة وعطل التخريب طاقم المركبة بالكامل؛ انتصر الخونة فوزاً ساحقاً! 💀");
-                    }
-                }
-            }, 1000);
+    if (!box) {
+        console.error("sabotage-alert missing from DOM");
+        return;
+    }
+
+    // 🔥 FORCE SHOW (مهم للموبايل)
+    box.style.cssText = `
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        position:fixed;
+        inset:0;
+        background:rgba(255,0,0,0.92);
+        z-index:999999999;
+        color:white;
+    `;
+
+    box.innerHTML = `
+        <h1>⚠️ طوارئ ⚠️</h1>
+        <p>هناك تخريب نشط - يجب الإصلاح فوراً</p>
+
+        <h1 id="sabotage-countdown">60</h1>
+
+        <button id="fixSabotageBtn"
+            style="
+                margin-top:20px;
+                padding:15px 25px;
+                font-size:18px;
+                background:#111;
+                color:#fff;
+                border:2px solid white;
+                border-radius:10px;
+                z-index:1000000;
+            ">
+            🛠 إصلاح التخريب
+        </button>
+    `;
+
+    // 🔥 مهم: تأخير بسيط للموبايل
+    setTimeout(() => {
+
+        let btn = document.getElementById("fixSabotageBtn");
+
+        if (!btn) {
+            console.error("Fix button not created");
+            return;
         }
+
+        btn.onclick = () => {
+
+            let value = prompt("أدخل رمز الإصلاح:");
+
+            if (!value) return;
+
+            if (
+                value.toLowerCase() === "fix" ||
+                value === "1234"
+            ) {
+                db.ref('parties/' + partyCode).update({
+                    sabotage: false
+                });
+
+                showCustomModal("تم الإصلاح 🛠️", "تم إيقاف الطوارئ بنجاح");
+            } else {
+                showCustomModal("خطأ ❌", "رمز غير صحيح");
+            }
+        };
+
+    }, 150);
+}
 
         function openScanner(mode){
     currentScanMode = mode;
