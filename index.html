@@ -476,6 +476,8 @@ img {
     </div>
 
     <script>
+        sessionStorage.removeItem('sabotage_target_timestamp');
+        
         function changeScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -3189,7 +3191,7 @@ else if(task.type === "stacking") {
 
         function startEmergencyCooldown() {
             isEmergencyReady = false;
-            let cd = 20;
+            let cd = 120;
             const btn = document.getElementById('btn-emergency-report');
             btn.disabled = true;
             btn.innerText = `🚨 الطوارئ في شحن (${cd})`;
