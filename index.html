@@ -209,6 +209,19 @@ img {
     position: relative;
     z-index: 10001;
 }
+
+#sabotage-alert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,0,0,0.85);
+    z-index: 999999;
+    text-align: center;
+    padding-top: 20vh;
+}
         @keyframes blink { from { opacity: 0.95; background: rgba(160,0,0,0.95); } to { opacity: 0.7; background: rgba(30,0,0,0.95); } }
         
         #reader { width: 100%; max-width: 320px; margin: 15px auto; background: #000; border: 5px dashed var(--button-color); border-radius: 16px; overflow: hidden; }
@@ -3060,16 +3073,19 @@ else if(task.type === "stacking") {
         }
 
         function signalSabotage() {
-            let targetTime = Date.now() + 120000;
+            let targetTime = Date.now() + 60000;
             db.ref('parties/' + partyCode).update({ sabotage: true, sabotageTargetTime: targetTime });
         }
 
         function showSabotageUI(targetTimestamp) {
-let box = document.getElementById('sabotage-alert');
-if (box) {
+
+    let box = document.getElementById('sabotage-alert');
+    if (!box) return;
+
     box.style.display = "block";
+    box.style.position = "fixed";
+    box.style.zIndex = "999999";
     box.style.pointerEvents = "auto";
-}
             sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
             
             clearInterval(sabotageCountdownInterval);
@@ -3247,22 +3263,22 @@ if (box) {
                 current--;
                 db.ref('parties/' + partyCode + '/meetingTimer').set(current);
                 
-                db.ref('parties/' + partyCode + '/players').once('value', snap => {
-                    let data = snap.val();
-                    let totalAlive = 0;
-                    let votedCount = 0;
-                    for(let p in data) {
-                        if(data[p].isAlive) {
-                            totalAlive++;
-                            if(data[p].currentVote !== "none") votedCount++;
-                        }
-                    }
-                    
-                    if (current <= 0 || votedCount >= totalAlive) {
-                        clearInterval(iv);
-                        processMeetingResultAndEject();
-                    }
-                });
+                db.ref('parties/' + partyCode).on('value', snap => {
+
+    let data = snap.val();
+    if (!data) return;
+
+    if (data.sabotage === true && data.sabotageTargetTime) {
+        showSabotageUI(data.sabotageTargetTime);
+    } else {
+        let box = document.getElementById('sabotage-alert');
+        if (box) box.style.display = "none";
+
+        if (window.sabotageCountdownInterval) {
+            clearInterval(window.sabotageCountdownInterval);
+        }
+    }
+});
             }, 1000);
         }
 
