@@ -503,7 +503,7 @@ img {
             { id: 4, text: "لعبة الحساب السريعة (Math Test)", desc: "قم بحل 10 مسائل رياضية عشوائية متتالية تظهر أرقامها ومعادلاتها بشكل صحيح بالاتجاه المناسب.", location: ["house", "forest"], type: "math" },
             { id: 5, text: "ميزان الذهب الحركي (Gyroscope Maze)", desc: "استخدم مستشعر الميل الفعلي لهاتفك لتوجيه الكرة الصفراء وتثبيتها داخل الدائرة الخضراء بالمركز لمدة 1.5 ثانية متواصلة.", location: ["house", "forest"], type: "gyro" },
             { id: 6, text: "تنظيف الشاشة الملوثة (Screen Wiper)", desc: "امسح الطبقة المعتمة الداكنة تماماً بإصبعك حتى تنقشع وتصل نسبة نقاء ونظافة الزجاج إلى 100% بالكامل.", location: ["house", "forest"], type: "wiper" },
-            { id: 7, text: "عداد الخطوات الاضطراري (Step Counter)", desc: "امشِ أو اركض حركياً في مكانك الفعلي ليرصد حساس الحركة الميكانيكي للهاتف 100 خطوة حقيقية.", location: ["house", "forest"], type: "steps" },
+            { id: 7, text: "عداد الخطوات الاضطراري (Step Counter)", desc: "هز التلفون ، او امشِ، حتى يصل العداد الى 100", location: ["house", "forest"], type: "steps" },
             { id: 8, text: "تعديل التردد اللاسلكي (Radio Tune)", desc: "حرك شريط السلايدر بدقة لتطابق تردد الموجة الجيبية المشوشة مع الموجة المستهدفة الثابتة.", location: ["house", "forest"], type: "radio" },
             { id: 9, text: "بطاقة الهوية السريعة (Card Swipe)", desc: "اسحب بطاقتك الممغنطة الذكية بإصبعك من اليسار إلى اليمين بسرعة معتدلة ومثالية دون تسرع أو تباطؤ شديد.", location: ["house", "forest"], type: "swipe" },
             { id: 10, text: "شحن الوقود (Fuel Refill)", desc: "اضغط مطولاً لضخ السائل في الخزان وارفع إصبعك فوراً عند وصول التعبئة للخط الأخضر المستهدف تماماً.", location: ["house", "forest"], type: "fuel" },
@@ -957,107 +957,170 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
             
             // 1. مهمة توصيل الأسلاك المعقدة (Wire Fix 15) بواسطة Canvas حقيقي
             if (task.type === "wires") {
-                let stage = 1;
-                let wireColors = ["red", "blue", "yellow", "pink"];
-                
-                function loadWireStage() {
-                    area.innerHTML = `<p style='font-weight:bold; color:var(--button-color)'>المرحلة المباشرة: ${stage} / 3</p>`;
-                    let container = document.createElement('div');
-                    container.className = "wire-canvas-container";
-                    container.innerHTML = `<canvas class="wire-canvas-element" id="wireCanvas"></canvas>`;
-                    
-                    // توليد النقاط الموزعة عشوائياً للمقابس على اليمين
-                    let shuffledRight = [...wireColors].sort(() => 0.5 - Math.random());
-                    
-                    wireColors.forEach((color, i) => {
-                        let leftDot = document.createElement('div');
-                        leftDot.style = `position:absolute; left:15px; top:${40 + i*60}px; width:18px; height:18px; border-radius:50%; background:${color}; z-index:10; border:2px solid #fff;`;
-                        container.appendChild(leftDot);
-                    });
-                    
-                    shuffledRight.forEach((color, i) => {
-                        let rightDot = document.createElement('div');
-                        rightDot.style = `position:absolute; right:15px; top:${40 + i*60}px; width:18px; height:18px; border-radius:50%; background:${color}; z-index:10; border:2px solid #fff;`;
-                        rightDot.setAttribute('data-color', color);
-                        rightDot.className = "right-socket-node";
-                        container.appendChild(rightDot);
-                    });
-                    
-                    area.appendChild(container);
-                    
-                    setTimeout(() => {
-                        let cv = document.getElementById('wireCanvas');
-                        if(!cv) return;
-                        cv.width = cv.parentElement.clientWidth;
-                        cv.height = cv.parentElement.clientHeight;
-                        let ctx = cv.getContext('2d');
-                        
-                        let activeColor = null;
-                        let startY = 0;
-                        let connectedCount = 0;
-                        
-                        cv.ontouchstart = (e) => {
-                            let rect = cv.getBoundingClientRect();
-                            let touchX = e.touches[0].clientX - rect.left;
-                            let touchY = e.touches[0].clientY - rect.top;
-                            
-                            if (touchX < 45) {
-                                let indexClicked = Math.floor((touchY - 20) / 60);
-                                if (indexClicked >= 0 && indexClicked < 4) {
-                                    activeColor = wireColors[indexClicked];
-                                    startY = 49 + indexClicked * 60;
-                                }
-                            }
-                        };
-                        
-                        cv.ontouchmove = (e) => {
-                            if (!activeColor) return;
-                            let rect = cv.getBoundingClientRect();
-                            let touchX = e.touches[0].clientX - rect.left;
-                            let touchY = e.touches[0].clientY - rect.top;
-                            
-                            ctx.clearRect(0, 0, cv.width, cv.height);
-                            // إعادة رسم الخطوط المكتملة السابقة إن وجدت في هذه المرحلة إن أردت، أو تتبع الخط الحالي
-                            ctx.beginPath();
-                            ctx.strokeStyle = activeColor;
-                            ctx.lineWidth = 4;
-                            ctx.moveTo(25, startY);
-                            ctx.lineTo(touchX, touchY);
-                            ctx.stroke();
-                        };
-                        
-                        cv.ontouchend = (e) => {
-                            if (!activeColor) return;
-                            let rect = cv.getBoundingClientRect();
-                            let change = e.changedTouches[0];
-                            let touchX = change.clientX - rect.left;
-                            let touchY = change.clientX - rect.top; // تقريبي للفحص الحركي
-                            
-                            if (touchX > cv.width - 50) {
-                                let rightIndex = Math.floor((change.clientY - rect.top - 20) / 60);
-                                if(rightIndex >= 0 && rightIndex < 4) {
-                                    let matchedColor = shuffledRight[rightIndex];
-                                    if (matchedColor === activeColor) {
-                                        connectedCount++;
-                                        if (connectedCount === 4) {
-                                            if (stage < 6) {
-                                                stage++;
-                                                loadWireStage();
-                                            } else {
-                                                pushToLiveAdminLog(task.text, "تم توصيل جميع الـ 12 سلكاً ملوناً بنجاح ومطابقة المقابس", "text", "Wire Fix Success");
-                                                completeActiveTaskLocal();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            activeColor = null;
-                            ctx.clearRect(0, 0, cv.width, cv.height);
-                        };
-                    }, 150);
+
+    let stage = 1;
+    let wireColors = ["red", "blue", "yellow", "pink"];
+
+    function loadWireStage() {
+
+        area.innerHTML = `
+            <p style="font-weight:bold; color:var(--button-color)">
+                المرحلة المباشرة: ${stage} / 3
+            </p>
+        `;
+
+        let container = document.createElement('div');
+        container.style.position = "relative";
+        container.style.width = "100%";
+        container.style.height = "260px";
+
+        let canvas = document.createElement('canvas');
+        canvas.id = "wireCanvas";
+        canvas.style.position = "absolute";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.width = container.clientWidth || window.innerWidth;
+        canvas.height = 260;
+
+        container.appendChild(canvas);
+
+        let shuffledRight = [...wireColors].sort(() => Math.random() - 0.5);
+
+        let leftDots = [];
+        let rightDots = [];
+
+        wireColors.forEach((color, i) => {
+            let d = document.createElement("div");
+            d.style = `
+                position:absolute;
+                left:10px;
+                top:${40 + i * 55}px;
+                width:18px;height:18px;
+                border-radius:50%;
+                background:${color};
+                border:2px solid #fff;
+                z-index:5;
+            `;
+            container.appendChild(d);
+
+            leftDots.push({ color, y: 49 + i * 55 });
+        });
+
+        shuffledRight.forEach((color, i) => {
+            let d = document.createElement("div");
+            d.style = `
+                position:absolute;
+                right:10px;
+                top:${40 + i * 55}px;
+                width:18px;height:18px;
+                border-radius:50%;
+                background:${color};
+                border:2px solid #fff;
+                z-index:5;
+            `;
+            container.appendChild(d);
+
+            rightDots.push({ color, y: 49 + i * 55 });
+        });
+
+        area.appendChild(container);
+
+        setTimeout(() => {
+
+            let ctx = canvas.getContext("2d");
+
+            let active = null;
+            let connections = [];
+
+            function drawAll() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                connections.forEach(c => {
+                    ctx.beginPath();
+                    ctx.strokeStyle = c.color;
+                    ctx.lineWidth = 4;
+                    ctx.moveTo(25, c.fromY);
+                    ctx.lineTo(canvas.width - 25, c.toY);
+                    ctx.stroke();
+                });
+            }
+
+            canvas.addEventListener("touchstart", (e) => {
+                let rect = canvas.getBoundingClientRect();
+                let y = e.touches[0].clientY - rect.top;
+
+                for (let i = 0; i < leftDots.length; i++) {
+                    if (Math.abs(y - leftDots[i].y) < 25) {
+                        active = leftDots[i];
+                    }
                 }
-                loadWireStage();
-            } 
+            });
+
+            canvas.addEventListener("touchmove", (e) => {
+                if (!active) return;
+
+                let rect = canvas.getBoundingClientRect();
+                let x = e.touches[0].clientX - rect.left;
+                let y = e.touches[0].clientY - rect.top;
+
+                drawAll();
+
+                ctx.beginPath();
+                ctx.strokeStyle = active.color;
+                ctx.lineWidth = 4;
+                ctx.moveTo(25, active.y);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            });
+
+            canvas.addEventListener("touchend", (e) => {
+                if (!active) return;
+
+                let rect = canvas.getBoundingClientRect();
+                let x = e.changedTouches[0].clientX - rect.left;
+                let y = e.changedTouches[0].clientY - rect.top;
+
+                let matched = null;
+
+                if (x > canvas.width - 60) {
+                    for (let r of rightDots) {
+                        if (Math.abs(y - r.y) < 25) {
+                            matched = r;
+                        }
+                    }
+                }
+
+                if (matched && matched.color === active.color) {
+                    connections.push({
+                        color: active.color,
+                        fromY: active.y,
+                        toY: matched.y
+                    });
+                }
+
+                active = null;
+                drawAll();
+
+                if (connections.length === 4) {
+                    if (stage < 6) {
+                        stage++;
+                        loadWireStage();
+                    } else {
+                        pushToLiveAdminLog(task.text,
+                            "تم توصيل جميع الأسلاك بنجاح",
+                            "text",
+                            "WIRES DONE");
+
+                        completeActiveTaskLocal();
+                    }
+                }
+            });
+
+        }, 100);
+    }
+
+    loadWireStage();
+}
             // 2. مهمة تحميل البيانات المستمر (Downloading Data) بالضغط المطول الصارم
             else if (task.type === "download") {
                 let currentProgress = 0;
@@ -1257,62 +1320,104 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
                 }
             }
             // 6. مهمة تنظيف الشاشة الملوثة (Screen Wiper) المعتمدة على النقاء (Clean Progress)
-            else if(task.type === "wiper") {
+else if(task.type === "wiper") {
+
     let progress = 0;
+    let wipedPixels = new Set();
 
     area.innerHTML = `
-        <div class="wiper-scratch-area" id="wiperArea" style="position:relative; overflow:hidden;">
-            <div class="wiper-clean-overlay" style="
+        <div id="wiperArea" style="
+            position:relative;
+            width:100%;
+            height:300px;
+            background:url('https://i.imgur.com/8QZQZQp.png'); /* غبار وهمي */
+            background-size:cover;
+            overflow:hidden;
+            border-radius:12px;
+        ">
+
+            <canvas id="wipeCanvas" style="
                 position:absolute;
-                width:100%;
-                height:100%;
-                background:#111827;
-                opacity:0.9;
-                pointer-events:none;
-            "></div>
+                top:0; left:0;
+                width:100%; height:100%;
+            "></canvas>
+
         </div>
+
         <p id="wiperProgress">0%</p>
     `;
 
-    const wiperArea = document.getElementById("wiperArea");
+    let canvas = document.getElementById("wipeCanvas");
+    let box = document.getElementById("wiperArea");
 
-    let wipedPixels = new Set();
+    let ctx = canvas.getContext("2d");
 
-    function getKey(x, y) {
-        // تقسيم الشاشة لخلايا صغيرة (grid)
-        let gx = Math.floor(x / 10);
-        let gy = Math.floor(y / 10);
-        return gx + "-" + gy;
+    function resize() {
+        canvas.width = box.clientWidth;
+        canvas.height = box.clientHeight;
+
+        // طبقة الغبار (سوداء شفافة)
+        ctx.fillStyle = "rgba(0,0,0,0.85)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.globalCompositeOperation = "destination-out";
     }
 
-    function handleWipe(e) {
-        let rect = wiperArea.getBoundingClientRect();
+    resize();
+
+    let lastX = null, lastY = null;
+
+    function wipe(e) {
+
+        let rect = canvas.getBoundingClientRect();
 
         let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
         let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+        if (lastX === null) {
+            lastX = x;
+            lastY = y;
+        }
 
-        let key = getKey(x, y);
+        ctx.beginPath();
+        ctx.lineWidth = 25;
+        ctx.lineCap = "round";
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
 
-        if (!wipedPixels.has(key)) {
-            wipedPixels.add(key);
+        lastX = x;
+        lastY = y;
 
-            // تحديث النسبة بناءً على المساحة المغطاة
-            let totalCells = Math.floor(rect.width / 10) * Math.floor(rect.height / 10);
-            progress = Math.floor((wipedPixels.size / totalCells) * 100);
+        // حساب التقدم بشكل تقريبي
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let transparent = 0;
 
-            document.getElementById("wiperProgress").innerText = progress + "%";
+        for (let i = 3; i < imgData.length; i += 4) {
+            if (imgData[i] === 0) transparent++;
+        }
 
-            if (progress >= 100) {
-                pushToLiveAdminLog(task.text, "تم تنظيف الشاشة بالكامل بمسح فعلي", "text", "WIPE DONE");
-                completeActiveTaskLocal();
-            }
+        progress = Math.floor((transparent / (imgData.length / 4)) * 100);
+
+        document.getElementById("wiperProgress").innerText = progress + "%";
+
+        if (progress > 70) {
+            pushToLiveAdminLog(task.text,
+                "تم تنظيف الغبار بالكامل",
+                "text",
+                "WIPE DONE");
+
+            completeActiveTaskLocal();
         }
     }
 
-    wiperArea.addEventListener("mousemove", handleWipe);
-    wiperArea.addEventListener("touchmove", handleWipe);
+    canvas.addEventListener("mousedown", () => {
+        lastX = lastY = null;
+    });
+
+    canvas.addEventListener("mousemove", wipe);
+    canvas.addEventListener("touchmove", wipe);
+
 }
             // 7. مهمة عداد الخطوات الاضطراري (Step Counter) المربوطة بحساس التسارع الفعلي للهاتف
             else if (task.type === "steps") {
@@ -1606,118 +1711,131 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
                 }, 100);
             }
             // 12. مهمة نمط القفل الإلكتروني (Pattern Lock) بحركة سحب واحدة متصلة
-            else if (task.type === "pattern") {
-                area.innerHTML = `
-                    <p style="font-weight:bold; color:var(--button-color);">النمط المطلوب: قم بتوصيل النقاط  بحركة سحب متصلة!</p>
-                    <div class="pattern-lock-board" id="patternBoard">
-                        <div class="pattern-lock-dot" data-index="1"></div>
-                        <div class="pattern-lock-dot" data-index="2"></div>
-                        <div class="pattern-lock-dot" data-index="3"></div>
-                        <div class="pattern-lock-dot" data-index="4"></div>
-                        <div class="pattern-lock-dot" data-index="5"></div>
-                        <div class="pattern-lock-dot" data-index="6"></div>
-                        <div class="pattern-lock-dot" data-index="7"></div>
-                        <div class="pattern-lock-dot" data-index="8"></div>
-                        <div class="pattern-lock-dot" data-index="9"></div>
-                    </div>
-                `;
-                setTimeout(() => {
-    let board = document.getElementById('patternBoard');
-    let connectedIndices = [];
-    let isDrawingPattern = false;
+           else if (task.type === "pattern") {
+    area.innerHTML = `
+        <p style="font-weight:bold; color:var(--button-color);">النمط المطلوب: قم بتوصيل النقاط بحركة سحب متصلة!</p>
+        <div class="pattern-lock-board" id="patternBoard">
+            <div class="pattern-lock-dot" data-index="1"></div>
+            <div class="pattern-lock-dot" data-index="2"></div>
+            <div class="pattern-lock-dot" data-index="3"></div>
+            <div class="pattern-lock-dot" data-index="4"></div>
+            <div class="pattern-lock-dot" data-index="5"></div>
+            <div class="pattern-lock-dot" data-index="6"></div>
+            <div class="pattern-lock-dot" data-index="7"></div>
+            <div class="pattern-lock-dot" data-index="8"></div>
+            <div class="pattern-lock-dot" data-index="9"></div>
+        </div>
+    `;
 
-    const dots = Array.from(document.querySelectorAll('.pattern-lock-dot'));
+    setTimeout(() => {
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
+        let board = document.getElementById('patternBoard');
+        let connectedIndices = [];
+        let isDrawingPattern = false;
 
-    const patternLength = 7 + Math.floor(Math.random() * 3); // 7 - 9
-    const pattern = shuffle([1,2,3,4,5,6,7,8,9]).slice(0, patternLength);
+        const dots = Array.from(document.querySelectorAll('.pattern-lock-dot'));
 
-    // 🔥 عرض النمط للاعب ثم إخفاؤه
-    function showPattern(callback) {
-        let i = 0;
-
-        function lightNext() {
-            if (i > 0) {
-                let prev = dots.find(d => +d.dataset.index === pattern[i - 1]);
-                if (prev) prev.classList.remove('active');
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-
-            if (i < pattern.length) {
-                let current = dots.find(d => +d.dataset.index === pattern[i]);
-                if (current) current.classList.add('active');
-                i++;
-                setTimeout(lightNext, 600);
-            } else {
-                // تنظيف آخر نقطة
-                setTimeout(() => {
-                    dots.forEach(d => d.classList.remove('active'));
-                    callback();
-                }, 400);
-            }
+            return array;
         }
 
-        lightNext();
-    }
+        // 🔥 صار ثابت 5 بدل 7–9
+        const patternLength = 5;
+        const pattern = shuffle([1,2,3,4,5,6,7,8,9]).slice(0, patternLength);
 
-    function checkDotCollision(clientX, clientY) {
-        dots.forEach(dot => {
-            let rect = dot.getBoundingClientRect();
-            if (
-                clientX > rect.left &&
-                clientX < rect.right &&
-                clientY > rect.top &&
-                clientY < rect.bottom
-            ) {
-                let idx = parseInt(dot.getAttribute('data-index'));
-                if (!connectedIndices.includes(idx)) {
-                    connectedIndices.push(idx);
-                    dot.classList.add('active');
+        function showPattern(callback) {
+            let i = 0;
+
+            function lightNext() {
+
+                if (i > 0) {
+                    let prev = dots.find(d => +d.dataset.index === pattern[i - 1]);
+                    if (prev) prev.classList.remove('active');
+                }
+
+                if (i < pattern.length) {
+                    let current = dots.find(d => +d.dataset.index === pattern[i]);
+
+                    if (current) {
+                        current.classList.add('active');
+
+                        // 🔥 إضاءة أوضح
+                        setTimeout(() => {
+                            current.classList.remove('active');
+                        }, 500);
+                    }
+
+                    i++;
+                    setTimeout(lightNext, 800); // 🔥 أبطأ وأوضح
+                } else {
+                    setTimeout(() => {
+                        dots.forEach(d => d.classList.remove('active'));
+                        callback();
+                    }, 500);
                 }
             }
-        });
-    }
 
-    function enablePlay() {
-        isDrawingPattern = true;
+            lightNext();
+        }
 
-        board.ontouchstart = (e) => {
-            connectedIndices = [];
-            dots.forEach(d => d.classList.remove('active'));
-            checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
-        };
+        function checkDotCollision(clientX, clientY) {
+            dots.forEach(dot => {
+                let rect = dot.getBoundingClientRect();
 
-        board.ontouchmove = (e) => {
-            if (!isDrawingPattern) return;
-            checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
-        };
+                if (
+                    clientX > rect.left &&
+                    clientX < rect.right &&
+                    clientY > rect.top &&
+                    clientY < rect.bottom
+                ) {
+                    let idx = parseInt(dot.getAttribute('data-index'));
 
-        board.ontouchend = () => {
-            let correct =
-                connectedIndices.length === pattern.length &&
-                connectedIndices.every((v, i) => v === pattern[i]);
+                    if (!connectedIndices.includes(idx)) {
+                        connectedIndices.push(idx);
+                        dot.classList.add('active');
+                    }
+                }
+            });
+        }
 
-            if (correct) {
-                pushToLiveAdminLog(task.text, "تم حل النمط بنجاح", "text", "Pattern Connected");
-                completeActiveTaskLocal();
-            } else {
-                showCustomModal("نمط خاطئ ❌", "حاول مرة ثانية وركز على الترتيب!");
+        function enablePlay() {
+            isDrawingPattern = true;
+
+            board.ontouchstart = (e) => {
+                connectedIndices = [];
                 dots.forEach(d => d.classList.remove('active'));
-            }
-        };
-    }
+                checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+            };
 
-    // 🚀 البداية: عرض النمط ثم السماح باللعب
-    showPattern(enablePlay);
+            board.ontouchmove = (e) => {
+                if (!isDrawingPattern) return;
+                checkDotCollision(e.touches[0].clientX, e.touches[0].clientY);
+            };
 
-}, 100);
-            }
+            board.ontouchend = () => {
+
+                let correct =
+                    connectedIndices.length === pattern.length &&
+                    connectedIndices.every((v, i) => v === pattern[i]);
+
+                if (correct) {
+                    pushToLiveAdminLog(task.text, "تم حل النمط بنجاح", "text", "Pattern Connected");
+                    completeActiveTaskLocal();
+                } else {
+                    showCustomModal("نمط خاطئ ❌", "حاول مرة ثانية وركز على الترتيب!");
+                    dots.forEach(d => d.classList.remove('active'));
+                }
+            };
+        }
+
+        showPattern(enablePlay);
+
+    }, 100);
+}
             // 13. مهمة توجيه الهوائي اللاسلكي (Satellite Align) تدوير دائري حركي دقيق لـ 100%
             else if (task.type === "satellite") {
                 area.innerHTML = `
@@ -1784,7 +1902,7 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
     let round = 1;
     const totalRounds = 3;
 
-    let currentLength = 7 + Math.floor(Math.random() * 3);
+    let currentLength = 5; // 🔥 كان 7–9 صار 5
 
     area.innerHTML = `
         <p id="simon-status-msg" style="font-weight:bold; color:var(--button-color);">
@@ -1804,6 +1922,16 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
         for (let i = 0; i < currentLength; i++) {
             simonSequence.push(Math.floor(Math.random() * 4));
         }
+    }
+
+    function flash(el, time = 700) {
+        if (!el) return;
+        el.style.opacity = "1";
+        el.style.transform = "scale(1.05)";
+        setTimeout(() => {
+            el.style.opacity = "0.4";
+            el.style.transform = "scale(1)";
+        }, time);
     }
 
     function playSequence() {
@@ -1828,14 +1956,12 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
 
             let el = document.getElementById("simon-" + simonSequence[i]);
 
-            if (el) {
-                el.style.opacity = "1";
-                setTimeout(() => el.style.opacity = "0.4", 350);
-            }
+            flash(el, 600); // 🔥 أطول وأوضح
 
             i++;
 
-        }, 600);
+        }, 900); // 🔥 أبطأ من 600 → تجربة مريحة
+
     }
 
     function disable(state) {
@@ -1850,19 +1976,24 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
         showCustomModal("خطأ ❌", "تم إعادة التحدي من البداية");
 
         round = 1;
-        currentLength = 7 + Math.floor(Math.random() * 3);
+        currentLength = 5;
 
         generateSequence();
-        setTimeout(playSequence, 500);
+        setTimeout(playSequence, 800);
     }
 
     function handleClick(idx) {
 
         let el = document.getElementById("simon-" + idx);
-        if (el) {
-            el.style.opacity = "1";
-            setTimeout(() => el.style.opacity = "0.4", 200);
-        }
+
+        // 🔥 ضغط واضح جدًا
+        el.style.opacity = "1";
+        el.style.transform = "scale(1.1)";
+
+        setTimeout(() => {
+            el.style.opacity = "0.4";
+            el.style.transform = "scale(1)";
+        }, 250);
 
         playerSequence.push(idx);
 
@@ -1873,25 +2004,23 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
             return;
         }
 
-        // ✔️ انتهاء الجولة
         if (playerSequence.length === simonSequence.length) {
 
             if (round < totalRounds) {
 
                 round++;
-                currentLength = 7 + Math.floor(Math.random() * 3);
+                currentLength = 5; // 🔥 ثابت بدل زيادة صعبة
 
                 generateSequence();
-
-                setTimeout(playSequence, 700);
+                setTimeout(playSequence, 900);
 
             } else {
 
                 pushToLiveAdminLog(
                     task.text,
-                    "أكمل 3 جولات Simon بنجاح",
+                    "أكمل Simon Says بنجاح",
                     "text",
-                    "SIMON 3 ROUNDS WIN"
+                    "SIMON WIN"
                 );
 
                 completeActiveTaskLocal();
@@ -1972,7 +2101,7 @@ let selected = shuffled.slice(0, Math.min(15, shuffled.length));
             else if (task.type === "recycling") {
                 area.innerHTML = `
                     <p style="font-weight:bold;">الخطوات الميدانية:</p>
-                    <p style="text-align:right; font-size:1rem;">1. اجمع 3 مهملات فارغة من الأرض واقعياً بالمنطقة.<br>2. ارمها في سلة النفايات الحقيقية المتواجدة بالموقع.<br>3. افتح الكاميرا بالأسفل والتقط صورة حية ومباشرة تؤكد ذلك لتوثيق السجل الميداني للمشرف.</p>
+                    <p style="text-align:right; font-size:1rem;">1. اجمع 3 مهملات فارغة واقعياً بالمنطقة.<br>2. ارمها في سلة النفايات الحقيقية المتواجدة بالموقع.<br>3. افتح الكاميرا بالأسفل والتقط صورة حية ومباشرة تؤكد ذلك لتوثيق السجل الميداني للمشرف.</p>
                     <div class="camera-capture-box">
                         <button class="btn-main" onclick="document.getElementById('recycling-camera-file').click()">فتح الكاميرا والتقاط الدليل 📸</button>
                         <input type="file" accept="image/*" capture="environment" class="hidden-camera-input" id="recycling-camera-file">
@@ -2931,12 +3060,16 @@ else if(task.type === "stacking") {
         }
 
         function signalSabotage() {
-            let targetTime = Date.now() + 60000;
+            let targetTime = Date.now() + 120000;
             db.ref('parties/' + partyCode).update({ sabotage: true, sabotageTargetTime: targetTime });
         }
 
         function showSabotageUI(targetTimestamp) {
-document.getElementById('sabotage-alert').style.pointerEvents = "auto";
+let box = document.getElementById('sabotage-alert');
+if (box) {
+    box.style.display = "block";
+    box.style.pointerEvents = "auto";
+}
             sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
             
             clearInterval(sabotageCountdownInterval);
