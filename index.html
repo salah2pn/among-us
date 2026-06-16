@@ -477,7 +477,6 @@ img {
 
     <script>
         sessionStorage.removeItem('sabotage_target_timestamp');
-        
         function changeScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -3078,32 +3077,7 @@ else if(task.type === "stacking") {
             db.ref('parties/' + partyCode).update({ sabotage: true, sabotageTargetTime: targetTime });
         }
 
-        function showSabotageUI(targetTimestamp) {
-
-            let box = document.getElementById('sabotage-alert');
-             if (!box) return;
-
-                box.style.display = "block";
-    box.style.position = "fixed";
-    box.style.zIndex = "999999";
-    box.style.pointerEvents = "auto";
-            sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString());
-            
-            clearInterval(sabotageCountdownInterval);
-            sabotageCountdownInterval = setInterval(() => {
-                let remaining = Math.ceil((targetTimestamp - Date.now()) / 1000);
-                if (remaining < 0) remaining = 0;
-                document.getElementById('sabotage-countdown').innerText = remaining;
-                
-                if (remaining <= 0) {
-                    clearInterval(sabotageCountdownInterval);
-                    if (isLeader) {
-                        db.ref('parties/' + partyCode + '/status').set("ended");
-                        db.ref('parties/' + partyCode + '/meetingFinalResultText').set("انتهى الوقت المحدود! انفجرت منشأة الطاقة وعطل التخريب طاقم المركبة بالكامل؛ انتصر الخونة فوزاً ساحقاً! 💀");
-                    }
-                }
-            }, 1000);
-        }
+       function showSabotageUI(targetTimestamp) { let box = document.getElementById('sabotage-alert'); if (!box) return; box.style.display = "block"; box.style.position = "fixed"; box.style.zIndex = "999999"; box.style.pointerEvents = "auto"; sessionStorage.setItem('sabotage_target_timestamp', targetTimestamp.toString()); clearInterval(sabotageCountdownInterval); sabotageCountdownInterval = setInterval(() => { let remaining = Math.ceil((targetTimestamp - Date.now()) / 1000); if (remaining < 0) remaining = 0; document.getElementById('sabotage-countdown').innerText = remaining; if (remaining <= 0) { clearInterval(sabotageCountdownInterval); if (isLeader) { db.ref('parties/' + partyCode + '/status').set("ended"); db.ref('parties/' + partyCode + '/meetingFinalResultText').set("انتهى الوقت المحدود! انفجرت منشأة الطاقة وعطل التخريب طاقم المركبة بالكامل؛ انتصر الخونة فوزاً ساحقاً! 💀"); } } }, 1000); }
 
         function openScanner(mode){
     currentScanMode = mode;
